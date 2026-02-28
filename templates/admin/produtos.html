@@ -1,0 +1,159 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Produtos & Estoque{% endblock %}
+{% block page_title %}🥟 Produtos & Controle de Estoque{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+        <h2>Cardápio e Estoque Atual</h2>
+        <span style="color:#555; font-size:0.82rem;">{{ produtos|length }} produto(s) cadastrado(s)</span>
+    </div>
+
+    <div style="overflow-x:auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Preço/un.</th>
+                    <th>R$/cento</th>
+                    <th>Estoque</th>
+                    <th>Status</th>
+                    <th>Alterar Estoque</th>
+                    <th>Alterar Preço</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in produtos %}
+                <tr>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:0.6rem;">
+                            {% if p.imagem %}
+                            <img src="/{{ p.imagem }}" alt="{{ p.nome }}"
+                                style="width:36px; height:36px; border-radius:8px; object-fit:cover; background:#111;" />
+                            {% endif %}
+                            <div>
+                                <div style="font-weight:700; color:#ddd;">{{ p.nome }}</div>
+                                <div style="font-size:0.75rem; color:#555;">{{ p.slug }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="color:#F0A500; font-weight:700;">
+                        R$ {{ '%.2f'|format(p.preco_unitario) }}
+                    </td>
+                    <td style="color:#888; font-size:0.88rem;">
+                        R$ {{ '%.2f'|format(p.preco_unitario * 100) }}
+                    </td>
+                    <td>
+                        {% if p.quantidade_estoque <= 50 %} <span style="color:#e74c3c; font-weight:700;">⚠ {{
+                            p.quantidade_estoque }}</span>
+                            {% elif p.quantidade_estoque <= 150 %} <span style="color:#F0A500; font-weight:700;">{{
+                                p.quantidade_estoque }}</span>
+                                {% else %}
+                                <span style="color:#2ecc71; font-weight:700;">{{ p.quantidade_estoque }}</span>
+                                {% endif %}
+                                <span style="color:#555; font-size:0.75rem;"> un.</span>
+                    </td>
+                    <td>
+                        {% if p.ativo %}
+                        <span class="status-badge status-Entregue">Ativo</span>
+                        {% else %}
+                        <span class="status-badge status-Cancelado">Inativo</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Alterar Estoque -->
+                    <td>
+                        <form method="POST" action="{{ url_for('admin.atualizar_estoque', product_id=p.id) }}"
+                            style="display:flex; gap:0.4rem; align-items:center;">
+                            <input type="number" name="quantidade" value="{{ p.quantidade_estoque }}" min="0"
+                                class="form-input" style="width:90px; padding:0.3rem 0.5rem; font-size:0.85rem;" />
+                            <button type="submit" class="btn btn-success"
+                                style="padding:0.3rem 0.7rem; font-size:0.8rem;">
+                                💾
+                            </button>
+                        </form>
+                    </td>
+
+                    <!-- Alterar Preço (com dupla confirmação) -->
+                    <td>
+                        <button class="btn btn-warning"
+                            style="padding:0.3rem 0.7rem; font-size:0.8rem; white-space:nowrap;"
+                            onclick="abrirModalPreco({{ p.id }}, '{{ p.nome }}', {{ p.preco_unitario }})">
+                            ✏ Preço
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ── Legenda de cores do estoque ───────────────────── -->
+<div style="margin-top:0.75rem; display:flex; gap:1.5rem; font-size:0.78rem; color:#555;">
+    <span><span style="color:#e74c3c;">⚠ Vermelho</span> = estoque crítico (≤ 50)</span>
+    <span><span style="color:#F0A500;">●</span> Amarelo = atenção (≤ 150)</span>
+    <span><span style="color:#2ecc71;">●</span> Verde = OK</span>
+</div>
+
+{% endblock %}
+
+<!-- ── Modal de Alteração de Preço ──────────────────── -->
+{% block extra_scripts %}
+<div class="modal-overlay" id="precoModal">
+    <div class="modal">
+        <h3>✏ Alterar Preço de Produto</h3>
+        <p id="precoModalDesc" style="margin-bottom:1rem;"></p>
+
+        <form method="POST" id="precoForm">
+            <input type="hidden" name="confirmado" value="sim" />
+            <div class="form-group">
+                <label class="form-label">Novo preço por unidade (R$)</label>
+                <input type="number" name="novo_preco" id="novoPrecoInput" step="0.01" min="0.01" class="form-input"
+                    placeholder="0.00" required />
+                <p style="margin-top:0.4rem; font-size:0.75rem; color:#555;">
+                    💡 Equivale a R$ <span id="precoCento">0,00</span> por cento (100 un.)
+                </p>
+            </div>
+
+            <div style="background:rgba(240,165,0,0.08); border:1px solid rgba(240,165,0,0.2);
+                        border-radius:8px; padding:0.75rem; margin-bottom:1.25rem;">
+                <p style="color:#F0A500; font-size:0.82rem; font-weight:600;">
+                    ⚠ Esta alteração será registrada no histórico de preços com seu nome de usuário.
+                </p>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" onclick="fecharModalPreco()">Cancelar</button>
+                <button type="submit" class="btn btn-warning" style="color:#111;">✓ Confirmar Alteração</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function abrirModalPreco(productId, nome, precoAtual) {
+        document.getElementById('precoModalDesc').textContent =
+            `Produto: ${nome} | Preço atual: R$ ${precoAtual.toFixed(2)}/un. (R$ ${(precoAtual * 100).toFixed(2)}/cento)`;
+        document.getElementById('novoPrecoInput').value = precoAtual.toFixed(2);
+        document.getElementById('precoCento').textContent = `R$ ${(precoAtual * 100).toFixed(2)}`;
+        document.getElementById('precoForm').action = `/admin/produtos/${productId}/preco`;
+        document.getElementById('precoModal').classList.add('open');
+    }
+
+    function fecharModalPreco() {
+        document.getElementById('precoModal').classList.remove('open');
+    }
+
+    document.getElementById('novoPrecoInput').addEventListener('input', function () {
+        const v = parseFloat(this.value) || 0;
+        document.getElementById('precoCento').textContent = `R$ ${(v * 100).toFixed(2)}`;
+    });
+
+    document.getElementById('precoModal').addEventListener('click', function (e) {
+        if (e.target === this) fecharModalPreco();
+    });
+</script>
+{% endblock %}
