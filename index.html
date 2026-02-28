@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Salgados Dona Sogra – Pirajuí/SP</title>
+    <meta name="description"
+        content="Os melhores salgados artesanais de Pirajuí! Coxinha, kibe, risole e muito mais. Peça agora pelo WhatsApp com entrega local." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#C0392B',
+                            cream: '#FFF8F0',
+                            dark: '#1A1A1A',
+                            gold: '#F0A500',
+                            yellow: '#FBBF24',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ── Carousel ── */
+        .carousel-track {
+            display: flex;
+            transition: transform 0.6s cubic-bezier(.25, .8, .25, 1);
+        }
+
+        .carousel-slide {
+            min-width: 100%;
+
+            /* ── Faz a imagem de fundo preencher o slide inteiro ── */
+            background-size: cover;
+            /* estica a img para cobrir tudo */
+            background-position: center;
+            /* centraliza a imagem */
+            position: relative;
+            /* necessário para o overlay absoluto */
+        }
+
+        /* ── Overlay escuro sobre a imagem para o texto ficar legível ── */
+        .carousel-slide::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            /* cobre 100% do slide */
+            background: rgba(0, 0, 0, 0.45);
+            /* preto 45% de opacidade */
+            z-index: 0;
+        }
+
+        /* ── Conteúdo do slide acima do overlay ── */
+        .carousel-slide>div.text-center {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── Quantity Control Pulse ── */
+        @keyframes qty-warn {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.04);
+            }
+        }
+
+        .qty-warn {
+            animation: qty-warn .3s ease-in-out 2;
+        }
+
+        /* ── Card hover ── */
+        .product-card {
+            transition: transform .25s ease, box-shadow .25s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, .15);
+        }
+
+        /* ── Floating cart badge ── */
+        #cart-fab {
+            transition: transform .2s ease;
+        }
+
+        #cart-fab:hover {
+            transform: scale(1.1);
+        }
+
+        /* ── Largura mínima – evita layout quebrado em telas muito pequenas ── */
+        body {
+            min-width: 320px;
+        }
+    </style>
+</head>
+
+<body class="bg-brand-cream font-sans text-brand-dark antialiased">
+
+    <!-- ═══════════════════════════════════════════════════════
+     1. BARRA DE AVISOS (estilo BK – fina, chamativa)
+════════════════════════════════════════════════════════ -->
+    <div id="announce-bar"
+        class="bg-brand-dark text-white text-xs sm:text-sm text-center py-2 px-4 flex items-center justify-center gap-2 relative">
+        <span class="animate-pulse">🔥</span>
+        <span id="announce-text">Pedidos acima de 100 unidades ganham <strong>entrega grátis</strong> em Pirajuí!</span>
+        <button onclick="document.getElementById('announce-bar').remove()"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white text-lg leading-none">×</button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+     2. HEADER PRINCIPAL (estilo Wendy's – duas cores)
+════════════════════════════════════════════════════════ -->
+    <header class="sticky top-0 z-50 shadow-lg">
+        <!-- Faixa superior vermelha (logo + nav) -->
+        <div class="bg-brand-dark flex items-center justify-between px-5 sm:px-10 py-3">
+            <!-- Logo -->
+            <a href="index.html" class="flex items-center gap-3">
+                <div class="flex-shrink-0">
+                    <img src="img/logo.png" alt="Logo Dona Sogra" class="h-16 w-auto object-contain" />
+                </div>
+                <div class="hidden sm:block">
+                    <p class="text-white font-black text-xl leading-tight tracking-wide">Dona Sogra</p>
+                    <p class="text-brand-gold text-[11px] font-semibold tracking-widest uppercase">Salgados Artesanais
+                    </p>
+                </div>
+            </a>
+
+            <!-- Nav Links -->
+            <nav class="flex items-center gap-4 sm:gap-6 text-white text-sm font-semibold">
+                <a href="#produtos" class="hidden sm:inline hover:text-brand-gold transition-colors">Cardápio</a>
+                <a href="#sobre" class="hidden sm:inline hover:text-brand-gold transition-colors">Sobre nós</a>
+                <a href="#contato" class="hidden sm:inline hover:text-brand-gold transition-colors">Contato</a>
+                <!-- Botão carrinho -->
+                <button onclick="irParaCarrinho()" id="header-cart-btn"
+                    class="relative flex items-center gap-2 bg-brand-gold text-brand-red font-bold px-4 py-2 rounded-full text-sm hover:bg-yellow-300 transition-all shadow">
+                    🛒 <span class="hidden sm:inline">Carrinho</span>
+                    <span id="cart-badge"
+                        class="hidden absolute -top-2 -right-2 bg-white text-brand-red text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-brand-red">0</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Faixa inferior branca/creme (tagline – estilo Wendy's) -->
+        <div class="bg-brand-cream border-b border-red-200 px-6 sm:px-10 py-1 hidden sm:block">
+            <p class="text-brand-dark text-xs font-semibold tracking-wide">
+                Temperados com amor e cuidado! Para atender sua família com excelência! &nbsp;•&nbsp; Encomendas a
+                partir de 25 unidades &nbsp;•&nbsp; Fritos ou Congelados
+            </p>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════
+     3. CARROSSEL DE BANNERS (estilo Sodiê – rotativo)
+════════════════════════════════════════════════════════ -->
+    <section class="relative overflow-hidden select-none" id="carousel">
+        <div class="carousel-track" id="carouselTrack">
+
+            <!-- Slide 1 -->
+            <div style="background-image: url('img/carrosel_salgados.png');"
+                class="carousel-slide bg-gradient-to-r from-red-700 via-red-600 to-orange-500 text-white flex items-center justify-center min-h-[220px] sm:min-h-[320px] px-8">
+                <div class="text-center">
+                    <p class="text-brand-gold font-black text-4xl sm:text-6xl leading-none drop-shadow-lg">🥟</p>
+                    <h2 class="font-black text-3xl sm:text-5xl mt-2 drop-shadow">Os melhores salgados de Pirajuí!</h2>
+                    <p class="mt-2 text-white/90 text-sm sm:text-base">Artesanais, crocantes, irresistíveis. Peça já!
+                    </p>
+                    <a href="#produtos"
+                        class="mt-5 inline-block bg-brand-gold text-brand-red font-black px-8 py-3 rounded-full text-sm hover:bg-yellow-300 transition shadow-lg">Ver
+                        Cardápio</a>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div style="background-image: url('img/carrosel_congelados.png');"
+                class="carousel-slide bg-gradient-to-br from-yellow-500 via-orange-400 to-red-500 text-white flex items-center justify-center min-h-[220px] sm:min-h-[320px] px-8">
+                <div class="text-center">
+                    <p class="text-white font-black text-4xl sm:text-6xl leading-none drop-shadow-lg">❄️</p>
+                    <h2 class="font-black text-3xl sm:text-5xl mt-2 drop-shadow">Congelados prontos para fritar!</h2>
+                    <p class="mt-2 text-white/90 text-sm sm:text-base">Estoque seu freezer e frite na hora. Qualidade
+                        garantida!</p>
+                    <a href="#produtos"
+                        class="mt-5 inline-block bg-white text-orange-600 font-black px-8 py-3 rounded-full text-sm hover:bg-orange-50 transition shadow-lg">Pedir
+                        Agora</a>
+                </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div style="background-image: url('img/carrosel_festas.png');"
+                class="carousel-slide bg-gradient-to-r from-red-900 via-red-700 to-red-600 text-white flex items-center justify-center min-h-[220px] sm:min-h-[320px] px-8">
+                <div class="text-center">
+                    <p class="text-brand-gold font-black text-4xl sm:text-6xl leading-none drop-shadow-lg">🎉</p>
+                    <h2 class="font-black text-3xl sm:text-5xl mt-2 drop-shadow">Festas & Eventos!</h2>
+                    <p class="mt-2 text-white/90 text-sm sm:text-base">Monte seu kit com 100+ unidades e ganhe frete
+                        grátis em Pirajuí.</p>
+                    <a href="#contato"
+                        class="mt-5 inline-block bg-brand-gold text-brand-red font-black px-8 py-3 rounded-full text-sm hover:bg-yellow-300 transition shadow-lg">Fale
+                        Conosco</a>
+                </div>
+            </div>
+
+            <!-- Slide 4 -->
+            <div style="background-image: url('img/carrosel_familia.png');"
+                class="carousel-slide bg-gradient-to-r from-red-900 via-red-700 to-red-600 text-white flex items-center justify-center min-h-[220px] sm:min-h-[320px] px-8">
+                <div class="text-center">
+                    <p class="text-brand-gold font-black text-4xl sm:text-6xl leading-none drop-shadow-lg">👨‍👩‍👧‍👦
+                    </p>
+                    <h2 class="font-black text-3xl sm:text-5xl mt-2 drop-shadow">Ideal para momentos em Família!</h2>
+                    <p class="mt-2 text-white/90 text-sm sm:text-base">Salgadinhos fritos na hora, quentinhos e
+                        deliciosos.</p>
+                    <a href="#contato"
+                        class="mt-5 inline-block bg-brand-gold text-brand-red font-black px-8 py-3 rounded-full text-sm hover:bg-yellow-300 transition shadow-lg">Fale
+                        Conosco</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controles do carrossel -->
+        <button onclick="moveCarousel(-1)"
+            class="absolute left-3 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white text-2xl w-10 h-10 rounded-full flex items-center justify-center transition"
+            aria-label="Anterior">‹</button>
+        <button onclick="moveCarousel(1)"
+            class="absolute right-3 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white text-2xl w-10 h-10 rounded-full flex items-center justify-center transition"
+            aria-label="Próximo">›</button>
+
+        <!-- Dots -->
+        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2" id="carouselDots"></div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════ 4. SEÇÃO DE PRODUTOS ════════════════════════════════════════════════════════ -->
+    <section id="produtos" class="py-14 px-5 sm:px-10 max-w-7xl mx-auto">
+        <div class="text-center mb-10">
+            <span
+                class="inline-block bg-red-100 text-brand-red text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-2">
+                Cardápio
+            </span>
+            <h2 class="font-black text-3xl sm:text-4xl text-brand-dark">Escolha seus favoritos</h2>
+            <p class="mt-2 text-gray-500 text-sm sm:text-base">
+                Mínimo de <strong class="text-brand-red">25 unidades</strong> por sabor. Ajuste a quantidade e adicione
+                ao carrinho.
+            </p>
+        </div>
+
+        <!-- Grid de Produtos (injetado pelo JS) -->
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════  5. SEÇÃO SOBRE  ═══════════════════════════════════════════════════════ -->
+    <section id="sobre" class="bg-brand-red text-white py-14 px-5 sm:px-10">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="font-black text-3xl sm:text-4xl mb-4">Nossa história 🤍</h2>
+            <p class="text-white/90 leading-relaxed max-w-2xl mx-auto">
+                Nascidos da receita secreta da Dona Sogra, nossos salgados carregam décadas de tradição, sabor caseiro e
+                carinho.
+                Cada salgado é feito com ingredientes frescos, massa crocante por fora e recheio generoso por dentro.
+                Somos referência em Pirajuí/SP para festas, eventos e para aquele momento em família.
+            </p>
+            <div class="mt-8 grid grid-cols-2 gap-4 max-w-sm mx-auto">
+                <div class="bg-white/10 rounded-xl p-4 backdrop-blur">
+                    <p class="font-black text-3xl text-brand-gold">10+</p>
+                    <p class="text-xs mt-1">Anos de tradição</p>
+                </div>
+                <div class="bg-white/10 rounded-xl p-4 backdrop-blur">
+                    <p class="font-black text-3xl text-brand-gold">9</p>
+                    <p class="text-xs mt-1">Sabores exclusivos</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+     6. FOOTER (estilo BK – robusto, fundo escuro)
+════════════════════════════════════════════════════════ -->
+    <footer id="contato" class="bg-brand-dark text-gray-300">
+        <div class="max-w-7xl mx-auto px-5 sm:px-10 py-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+
+            <!-- Coluna Marca -->
+            <div>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="flex-shrink-0">
+                        <img src="img/logo.png" alt="Logo Dona Sogra" class="h-[60px] w-auto object-contain" />
+                    </div>
+                    <div>
+                        <p class="text-white font-black text-lg leading-tight">Dona Sogra</p>
+                        <p class="text-brand-gold text-[10px] tracking-widest uppercase">Salgados Artesanais</p>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-400 leading-relaxed">Salgados artesanais com tradição e qualidade. Feitos
+                    com amor em Pirajuí/SP.</p>
+            </div>
+
+            <!-- Coluna Links -->
+            <div>
+                <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-sm">Navegação</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="#produtos" class="hover:text-brand-gold transition-colors">🍽 Cardápio</a></li>
+                    <li><a href="#sobre" class="hover:text-brand-gold transition-colors">🏠 Sobre nós</a></li>
+                    <li><a href="cart.html" class="hover:text-brand-gold transition-colors">🛒 Meu Carrinho</a></li>
+                </ul>
+            </div>
+
+            <!-- Coluna Contato -->
+            <div>
+                <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-sm">Contato</h4>
+                <ul class="space-y-2 text-sm">
+                    <li class="flex items-center gap-2">📍 <span>Pirajuí – SP</span></li>
+                    <li class="flex items-center gap-2">📞 <a href="tel:+5514996748488"
+                            class="hover:text-brand-gold transition-colors">(14) 9 9674-8488</a></li>
+                    <li class="flex items-center gap-2">⏰ <span>Seg–Sáb: 8h às 20h</span></li>
+                </ul>
+            </div>
+
+            <!-- Coluna Redes Sociais -->
+            <div>
+                <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-sm">Redes Sociais</h4>
+                <div class="flex flex-col gap-3">
+                    <a href="https://wa.me/5514996748488" target="_blank"
+                        class="flex items-center gap-3 bg-green-600 hover:bg-green-500 text-white text-sm font-semibold px-4 py-2 rounded-lg transition">
+                        <svg viewBox="0 0 24 24" class="w-5 h-5 fill-current">
+                            <path
+                                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                            <path
+                                d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.123 1.528 5.855L.077 23.077a1 1 0 001.18 1.18l5.222-1.451A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22a9.944 9.944 0 01-5.07-1.38l-.361-.214-3.742 1.04 1.04-3.742-.214-.361A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
+                        </svg>
+                        WhatsApp
+                    </a>
+                    <a href="https://www.instagram.com/salgadosdonasogra/" target="_blank"
+                        class="flex items-center gap-3 bg-gradient-to-r from-purple-600 to-pink-500 hover:opacity-90 text-white text-sm font-semibold px-4 py-2 rounded-lg transition">
+                        <svg viewBox="0 0 24 24" class="w-5 h-5 fill-current">
+                            <path
+                                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+                        </svg>
+                        Instagram
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rodapé inferior -->
+        <div class="border-t border-gray-700 py-4 text-center text-xs text-gray-500">
+            &copy; 2025 Salgados Dona Sogra – Pirajuí/SP. Todos os direitos reservados.
+        </div>
+    </footer>
+
+    <!-- FAB flutuante do carrinho (mobile) -->
+    <button onclick="irParaCarrinho()" id="cart-fab"
+        class="fixed bottom-6 right-6 z-50 bg-brand-red text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-2xl sm:hidden">
+        🛒
+        <span id="cart-fab-badge"
+            class="hidden absolute -top-1 -right-1 bg-brand-gold text-brand-red text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">0</span>
+    </button>
+
+    <!-- ═══════════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════════ -->
+    <script>
+        /* ─────────────────────────────────────────────────────────
+           DADOS DOS PRODUTOS
+           preco = valor por UNIDADE (R$80,00 / 100 = R$0,80)
+           O display mostra em "cento" (100 unidades = R$80,00).
+        ───────────────────────────────────────────────────────── */
+
+        const PRODUTOS = [
+            { id: 'coxinha de frango', nome: 'Coxinha de Frango', desc: 'Massa crocante, recheio de frango desfiado temperado.', preco: 0.70, img: 'img/coxinha.png' },
+            { id: 'coxinha de carne', nome: 'Coxinha de Carne', desc: 'Coxinha frita com recheio de carne moída temperada.', preco: 0.85, img: 'img/coxinha_de_carne.png' },
+            { id: 'kibe', nome: 'Kibe', desc: 'Kibe tradicional, crocante por fora e suculento por dentro.', preco: 0.70, img: 'img/kibe.png' },
+            { id: 'kibe com queijo', nome: 'Kibolinha', desc: 'Kibe com queijo, crocante por fora com queijo derretido por dentro.', preco: 0.85, img: 'img/kibolinha.png' },
+            { id: 'fataya', nome: 'Fataya', desc: 'Massa com recheio cremoso de carne moída temperada.', preco: 1.10, img: 'img/fataya.png' },
+            { id: 'croquete de salsicha', nome: 'Croquete de Salsicha', desc: 'Crocante por fora com recheio cremoso de salsicha por dentro.', preco: 0.70, img: 'img/croquete_de_salsicha.png' },
+            { id: 'bolinha de queijo', nome: 'Bolinha de Queijo', desc: 'Bolinhas crocantes com mozzarella derretida por dentro.', preco: 0.80, img: 'img/bolinha_queijo.png' },
+            { id: 'bolinho de bacalhau', nome: 'Bolinho de Bacalhau', desc: 'Crocante por fora com recheio cremoso de bacalhau por dentro.', preco: 1.00, img: 'img/bolinho_de_bacalhau.png' },
+            { id: 'almofadinha de calabresa e queijo', nome: 'Almofadinha de Calabresa e Queijo', desc: 'Crocante por fora com recheio cremoso de calabresa e queijo por dentro.', preco: 0.80, img: 'img/almofadinha_calabresa_e_queijo.png' },
+        ];
+
+        /* ─────────────────────────────────────────────────────────
+           CONSTANTE DE NEGÓCIO: MÍNIMO DE UNIDADES POR ITEM
+           REGRA: o usuário NÃO pode adicionar menos de MIN_QTY ao carrinho.
+           O controle de quantidade no card começa nesse valor e não permite ir abaixo.
+        ───────────────────────────────────────────────────────── */
+        const MIN_QTY = 25;
+
+        /* ─────────────────────────────────────────────────────────
+           ESTADO DO CARRINHO – armazenado no localStorage
+        ───────────────────────────────────────────────────────── */
+        let carrinho = JSON.parse(localStorage.getItem('ds_carrinho') || '[]');
+
+        function salvarCarrinho() {
+            localStorage.setItem('ds_carrinho', JSON.stringify(carrinho));
+            atualizarBadges();
+        }
+
+        function atualizarBadges() {
+            const totalItens = carrinho.reduce((sum, i) => sum + i.qty, 0);
+            ['cart-badge', 'cart-fab-badge'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (totalItens > 0) {
+                    el.textContent = totalItens;
+                    el.classList.remove('hidden');
+                    el.classList.add('flex');
+                } else {
+                    el.classList.add('hidden');
+                    el.classList.remove('flex');
+                }
+            });
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           ADICIONAR AO CARRINHO
+           Verifica a trava de MIN_QTY antes de qualquer operação.
+        ───────────────────────────────────────────────────────── */
+        function adicionarAoCarrinho(produtoId) {
+            const qtyInput = document.getElementById('qty-' + produtoId);
+            // Lê a quantidade e garante que é inteiro
+            let qty = parseInt(qtyInput.value, 10);
+
+            /* TRAVA DE 25 UNIDADES:
+               Se o valor for menor que MIN_QTY (25), rejeitamos e
+               forcamos o input de volta ao mínimo com animação visual. */
+            if (isNaN(qty) || qty < MIN_QTY) {
+                qtyInput.value = MIN_QTY;
+                qtyInput.classList.add('qty-warn', 'border-red-500', 'ring-2', 'ring-red-400');
+                setTimeout(() => qtyInput.classList.remove('qty-warn', 'border-red-500', 'ring-2', 'ring-red-400'), 800);
+                mostrarToast(`⚠️ Mínimo de ${MIN_QTY} unidades por sabor!`, 'warn');
+                return;
+            }
+
+            const produto = PRODUTOS.find(p => p.id === produtoId);
+            const existente = carrinho.find(i => i.id === produtoId);
+
+            if (existente) {
+                existente.qty += qty;
+            } else {
+                carrinho.push({ ...produto, qty });
+            }
+
+            salvarCarrinho();
+            mostrarToast(`✅ ${produto.nome} adicionado! (${qty} unid.)`);
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           CONTROLE DE QUANTIDADE NO CARD
+           O botão "–" nunca permite ir abaixo de MIN_QTY (25).
+        ───────────────────────────────────────────────────────── */
+        function alterarQty(produtoId, delta) {
+            const input = document.getElementById('qty-' + produtoId);
+            let val = parseInt(input.value, 10) + delta;
+
+            /* TRAVA: impede que o valor no input desça abaixo do mínimo */
+            if (val < MIN_QTY) val = MIN_QTY;
+
+            input.value = val;
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           TOAST DE NOTIFICAÇÃO
+        ───────────────────────────────────────────────────────── */
+        function mostrarToast(msg, tipo = 'ok') {
+            const existente = document.getElementById('toast');
+            if (existente) existente.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'toast';
+            const bg = tipo === 'warn' ? 'bg-yellow-500' : 'bg-green-600';
+            toast.className = `fixed bottom-24 sm:bottom-8 left-1/2 -translate-x-1/2 z-[999] ${bg} text-white text-sm font-semibold px-5 py-3 rounded-full shadow-xl transition-all`;
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           NAVEGAÇÃO PARA O CARRINHO
+        ───────────────────────────────────────────────────────── */
+        function irParaCarrinho() {
+            if (carrinho.length === 0) {
+                mostrarToast('🛒 Seu carrinho está vazio!', 'warn');
+                return;
+            }
+            window.location.href = 'cart.html';
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           RENDERIZAR GRID DE PRODUTOS
+        ───────────────────────────────────────────────────────── */
+        function renderizarProdutos() {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = PRODUTOS.map(p => {
+                const precoCentoFmt = (p.preco * 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const precoMinFmt = (p.preco * 25).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                return `
+    <article class="product-card bg-white rounded-2xl overflow-hidden shadow-md flex flex-col" id="card-${p.id}">
+      <!-- Imagem do produto -->
+      <div class="relative overflow-hidden h-52 bg-gray-100">
+        <img src="${p.img}" alt="${p.nome}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" />
+        <span class="absolute top-3 left-3 bg-brand-red text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">Artesanal</span>
+      </div>
+
+      <!-- Conteúdo do card -->
+      <div class="p-5 flex flex-col flex-1">
+        <h3 class="font-black text-lg text-brand-dark leading-tight">${p.nome}</h3>
+        <p class="text-gray-500 text-sm mt-1 flex-1">${p.desc}</p>
+
+        <!-- Preços (modelo: R$80,00 por cento) -->
+        <div class="mt-4 flex items-end justify-between">
+          <div>
+            <p class="text-gray-400 text-xs">Preço por cento (100 un.)</p>
+            <p class="text-brand-red font-black text-2xl">${precoCentoFmt}<span class="text-sm font-normal text-gray-400"> /cento</span></p>
+            <p class="text-gray-400 text-xs mt-0.5">25 un. = <strong class="text-gray-600">${precoMinFmt}</strong></p>
+          </div>
+        </div>
+
+        <!-- CONTROLE DE QUANTIDADE (mínimo = 25) -->
+        <div class="mt-4">
+          <label class="text-xs text-gray-500 font-semibold mb-1 block">Quantidade <span class="text-brand-red">(mín. 25)</span></label>
+          <div class="flex items-center gap-2">
+            <!-- Botão "–": usa alterarQty que respeita MIN_QTY -->
+            <button onclick="alterarQty('${p.id}', -25)" aria-label="Diminuir"
+              class="w-9 h-9 rounded-full bg-gray-100 hover:bg-red-100 text-brand-red font-bold text-lg flex items-center justify-center transition border border-gray-200">−</button>
+
+            <input id="qty-${p.id}" type="number" value="${MIN_QTY}" min="${MIN_QTY}" step="25"
+              class="w-16 text-center border border-gray-200 rounded-lg py-1.5 font-bold text-brand-dark text-sm focus:outline-none focus:ring-2 focus:ring-brand-red transition"
+              aria-label="Quantidade de ${p.nome}" />
+
+            <button onclick="alterarQty('${p.id}', 25)" aria-label="Aumentar"
+              class="w-9 h-9 rounded-full bg-gray-100 hover:bg-green-100 text-green-700 font-bold text-lg flex items-center justify-center transition border border-gray-200">+</button>
+          </div>
+        </div>
+
+        <!-- Botão Adicionar -->
+        <button onclick="adicionarAoCarrinho('${p.id}')"
+          class="mt-5 w-full bg-brand-red hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all shadow hover:shadow-lg active:scale-95 text-sm">
+          🛒 Adicionar ao Carrinho
+        </button>
+      </div>
+    </article>`;
+            }).join('');
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           CARROSSEL – lógica de rotação automática
+        ───────────────────────────────────────────────────────── */
+        let carouselIndex = 0;
+        const TOTAL_SLIDES = 4;
+
+        function moveCarousel(dir) {
+            carouselIndex = (carouselIndex + dir + TOTAL_SLIDES) % TOTAL_SLIDES;
+            aplicarCarousel();
+        }
+
+        function aplicarCarousel() {
+            const track = document.getElementById('carouselTrack');
+            track.style.transform = `translateX(-${carouselIndex * 100}%)`;
+
+            // Atualiza dots
+            document.querySelectorAll('.carousel-dot').forEach((d, i) => {
+                d.classList.toggle('bg-white', i === carouselIndex);
+                d.classList.toggle('bg-white/40', i !== carouselIndex);
+            });
+        }
+
+        function iniciarCarousel() {
+            const dots = document.getElementById('carouselDots');
+            for (let i = 0; i < TOTAL_SLIDES; i++) {
+                const dot = document.createElement('button');
+                dot.className = `carousel-dot w-2.5 h-2.5 rounded-full transition-all ${i === 0 ? 'bg-white' : 'bg-white/40'}`;
+                dot.setAttribute('aria-label', `Slide ${i + 1}`);
+                dot.onclick = () => { carouselIndex = i; aplicarCarousel(); };
+                dots.appendChild(dot);
+            }
+            // Auto-play a cada 5 segundos
+            setInterval(() => moveCarousel(1), 5000);
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           INICIALIZAÇÃO
+        ───────────────────────────────────────────────────────── */
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarProdutos();
+            iniciarCarousel();
+            atualizarBadges();
+        });
+    </script>
+</body>
+
+</html>
