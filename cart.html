@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Carrinho – Salgados Dona Sogra</title>
+    <meta name="description" content="Confira seu pedido e envie via WhatsApp." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#C0392B',
+                            cream: '#FFF8F0',
+                            dark: '#1A1A1A',
+                            gold: '#F0A500',
+                            yellow: '#FBBF24',
+                        }
+                    },
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Sticky order summary card */
+        @media (min-width: 1024px) {
+            .summary-sticky {
+                position: sticky;
+                top: 90px;
+            }
+        }
+
+        /* Smooth row hover */
+        .cart-row {
+            transition: background .15s ease;
+        }
+
+        .cart-row:hover {
+            background: #fff8f0;
+        }
+
+        /* ── Largura mínima – evita layout quebrado em telas muito pequenas ── */
+        body {
+            min-width: 320px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-brand-dark antialiased min-h-screen flex flex-col">
+
+    <!-- ═══════════════════════════════════════════════════════
+     BARRA DE AVISOS (estilo BK)
+════════════════════════════════════════════════════════ -->
+    <div class="bg-brand-dark text-white text-xs text-center py-2 px-4">
+        🔥 Pedidos acima de 100 unidades ganham <strong>entrega grátis</strong> em Pirajuí!
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+     HEADER  (estilo Wendy's)
+════════════════════════════════════════════════════════ -->
+    <header class="sticky top-0 z-50 shadow-lg">
+        <div class="bg-brand-dark flex items-center justify-between px-5 sm:px-10 py-3">
+            <a href="index.html" class="flex items-center gap-3">
+                <div class="flex-shrink-0">
+                    <img src="img/logo.png" alt="Logo Dona Sogra" class="h-16 w-auto object-contain" />
+                </div>
+                <div class="hidden sm:block">
+                    <p class="text-white font-black text-xl leading-tight tracking-wide">Dona Sogra</p>
+                    <p class="text-brand-gold text-[11px] font-semibold tracking-widest uppercase">Salgados Artesanais
+                    </p>
+                </div>
+            </a>
+            <nav class="flex items-center gap-4 text-white text-sm font-semibold">
+                <a href="index.html" class="flex items-center gap-1 hover:text-brand-gold transition-colors">‹ Voltar ao
+                    Cardápio</a>
+            </nav>
+        </div>
+        <div class="bg-brand-gold border-b border-red-200 px-6 sm:px-10 py-1 hidden sm:block">
+            <p class="text-brand-red text-xs font-semibold tracking-wide">🛒 Revise seu pedido e escolha a forma de
+                pagamento</p>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════
+     CONTEÚDO PRINCIPAL
+════════════════════════════════════════════════════════ -->
+    <main
+        class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-8 py-10 lg:grid lg:grid-cols-[1fr_380px] lg:gap-8 items-start">
+
+        <!-- ── LADO ESQUERDO: Lista de itens do carrinho ── -->
+        <div>
+            <h1 class="font-black text-2xl sm:text-3xl mb-6 flex items-center gap-2">
+                🛒 Meu Carrinho
+                <span id="item-count-label" class="text-sm font-semibold text-gray-400"></span>
+            </h1>
+
+            <!-- Tabela de itens -->
+            <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+                <!-- Cabeçalho da tabela -->
+                <div
+                    class="hidden sm:grid grid-cols-[80px_1fr_120px_110px_40px] gap-4 items-center px-6 py-3 bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wide">
+                    <span>Imagem</span>
+                    <span>Produto</span>
+                    <span class="text-center">Preço</span>
+                    <span class="text-center">Qtd</span>
+                    <span></span>
+                </div>
+
+                <!-- Linhas dos produtos (injetadas pelo JS) -->
+                <div id="cart-items-list"></div>
+
+                <!-- Estado vazio -->
+                <div id="cart-empty" class="hidden py-16 text-center">
+                    <p class="text-5xl mb-4">🥟</p>
+                    <p class="text-gray-400 font-semibold">Seu carrinho está vazio.</p>
+                    <a href="index.html"
+                        class="mt-4 inline-block bg-brand-red text-white font-bold px-6 py-3 rounded-full text-sm hover:bg-red-700 transition">Ver
+                        Cardápio</a>
+                </div>
+            </div>
+
+            <!-- ── SELECTS OBRIGATÓRIOS ── -->
+            <div class="mt-8 grid sm:grid-cols-2 gap-4" id="selects-section">
+
+                <!-- 1. Forma de Pagamento -->
+                <div>
+                    <label for="pagamento" class="block text-sm font-bold text-brand-dark mb-1">
+                        💳 Forma de Pagamento <span class="text-brand-red">*</span>
+                    </label>
+                    <select id="pagamento"
+                        class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition font-semibold bg-white appearance-none cursor-pointer">
+                        <option value="">— Selecione —</option>
+                        <option value="Pix">💠 Pix</option>
+                        <option value="Dinheiro">💵 Dinheiro</option>
+                        <option value="Cartão">💳 Cartão</option>
+                    </select>
+                </div>
+
+                <!-- 2. Estado do Salgado -->
+                <div>
+                    <label for="estado" class="block text-sm font-bold text-brand-dark mb-1">
+                        🔥 Estado do Salgado <span class="text-brand-red">*</span>
+                    </label>
+                    <select id="estado"
+                        class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition font-semibold bg-white appearance-none cursor-pointer">
+                        <option value="">— Selecione —</option>
+                        <option value="Fritos">🔥 Fritos (prontos para consumo)</option>
+                        <option value="Congelados">❄️ Congelados (frite em casa)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Mensagem de observação -->
+            <div class="mt-4">
+                <label for="obs" class="block text-sm font-bold text-brand-dark mb-1">📝 Observações (opcional)</label>
+                <textarea id="obs" rows="2" placeholder="Ex: sem gergelim, ponto extra de fritura..."
+                    class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition resize-none bg-white"></textarea>
+            </div>
+        </div><!-- /esquerda -->
+
+        <!-- ── LADO DIREITO (sticky): Card de Resumo e Checkout ── -->
+        <aside class="mt-8 lg:mt-0">
+            <div class="summary-sticky bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+
+                <!-- Cabeçalho do card -->
+                <div class="bg-brand-red text-white px-6 py-4">
+                    <h2 class="font-black text-xl">Resumo do Pedido</h2>
+                    <p class="text-white/80 text-xs mt-0.5">Verifique antes de enviar</p>
+                </div>
+
+                <div class="px-6 py-5 space-y-3" id="summary-lines"></div>
+
+                <div class="px-6 pb-5">
+                    <!-- Divisor -->
+                    <div class="border-t border-gray-100 pt-4 mb-4">
+                        <div class="flex justify-between text-sm text-gray-500 mb-1">
+                            <span>Subtotal</span>
+                            <span id="subtotal-val" class="font-semibold">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-500">
+                            <span>Entrega</span>
+                            <span class="text-green-600 font-semibold" id="frete-val">A combinar</span>
+                        </div>
+                        <div class="flex justify-between items-center mt-3">
+                            <span class="font-black text-xl text-brand-dark">Total</span>
+                            <span id="total-val" class="font-black text-2xl text-brand-red">R$ 0,00</span>
+                        </div>
+                    </div>
+
+                    <!-- Informações de pagamento e estado (resumo visual) -->
+                    <div id="summary-selects" class="mb-4 space-y-2 text-sm hidden">
+                        <div class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                            <span>💳</span>
+                            <span class="text-gray-500">Pagamento:</span>
+                            <span id="sum-pagamento" class="font-bold text-brand-dark ml-auto"></span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                            <span>🔥</span>
+                            <span class="text-gray-500">Estado:</span>
+                            <span id="sum-estado" class="font-bold text-brand-dark ml-auto"></span>
+                        </div>
+                    </div>
+
+                    <!-- BOTÃO ENVIAR VIA WHATSAPP -->
+                    <button id="btn-whatsapp" onclick="enviarWhatsApp()"
+                        class="w-full bg-green-600 hover:bg-green-500 active:scale-95 text-white font-black py-4 rounded-xl text-base flex items-center justify-center gap-2 transition-all shadow-lg">
+                        <svg viewBox="0 0 24 24" class="w-5 h-5 fill-current flex-shrink-0">
+                            <path
+                                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                            <path
+                                d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.123 1.528 5.855L.077 23.077a1 1 0 001.18 1.18l5.222-1.451A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22a9.944 9.944 0 01-5.07-1.38l-.361-.214-3.742 1.04 1.04-3.742-.214-.361A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
+                        </svg>
+                        Enviar Pedido via WhatsApp
+                    </button>
+
+                    <p class="text-center text-gray-400 text-xs mt-3">
+                        Ao clicar, você será redirecionado ao WhatsApp com o pedido formatado.
+                    </p>
+                </div>
+            </div>
+        </aside>
+
+    </main><!-- /main -->
+
+    <!-- ═══════════════════════════════════════════════════════
+     FOOTER MINI
+════════════════════════════════════════════════════════ -->
+    <footer class="bg-brand-dark text-gray-500 text-xs text-center py-5 mt-8">
+        <p>&copy; 2025 Salgados Dona Sogra – Pirajuí/SP. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- ═══════════════════════════════════════════════════════
+     JAVASCRIPT – CARRINHO & WHATSAPP
+════════════════════════════════════════════════════════ -->
+    <script>
+        /* ─────────────────────────────────────────────────────────
+           NÚMERO DO PROPRIETÁRIO (WhatsApp)
+           Formato: código do país + DDD + número (sem espaços/hífen)
+        ───────────────────────────────────────────────────────── */
+        const WHATSAPP_NUMBER = '5514996748488'; // ← Altere aqui
+
+        /* ─────────────────────────────────────────────────────────
+           RECUPERA O CARRINHO DO localStorage
+        ───────────────────────────────────────────────────────── */
+        let carrinho = JSON.parse(localStorage.getItem('ds_carrinho') || '[]');
+
+        /* ─────────────────────────────────────────────────────────
+           FORMATA MOEDA PARA PT-BR
+        ───────────────────────────────────────────────────────── */
+        function moeda(val) {
+            return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           CÁLCULO DE TOTAIS
+           PREÇO TOTAL = soma de (preco * qty) de cada item
+        ───────────────────────────────────────────────────────── */
+        function calcularTotais() {
+            return carrinho.reduce((acc, item) => acc + item.preco * item.qty, 0);
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           REMOVER ITEM DO CARRINHO
+        ───────────────────────────────────────────────────────── */
+        function removerItem(id) {
+            carrinho = carrinho.filter(i => i.id !== id);
+            localStorage.setItem('ds_carrinho', JSON.stringify(carrinho));
+            renderizarCarrinho();
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           ALTERAR QUANTIDADE NO CARRINHO
+           TRAVA: mínimo de 25 unidades mesmo dentro do carrinho.
+        ───────────────────────────────────────────────────────── */
+        const MIN_QTY = 25;
+
+        function alterarQtyCarrinho(id, novaQty) {
+            novaQty = parseInt(novaQty, 10);
+
+            /* TRAVA DE 25 UNIDADES: se a nova quantidade for menor que o mínimo,
+               corrigimos para o mínimo antes de salvar. */
+            if (isNaN(novaQty) || novaQty < MIN_QTY) novaQty = MIN_QTY;
+
+            const item = carrinho.find(i => i.id === id);
+            if (item) item.qty = novaQty;
+            localStorage.setItem('ds_carrinho', JSON.stringify(carrinho));
+            renderizarCarrinho();
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           RENDERIZAR A LISTA DE ITENS
+        ───────────────────────────────────────────────────────── */
+        function renderizarCarrinho() {
+            const list = document.getElementById('cart-items-list');
+            const empty = document.getElementById('cart-empty');
+            const summary = document.getElementById('summary-lines');
+            const subtotalEl = document.getElementById('subtotal-val');
+            const totalEl = document.getElementById('total-val');
+            const freteEl = document.getElementById('frete-val');
+            const countLabel = document.getElementById('item-count-label');
+
+            if (carrinho.length === 0) {
+                list.innerHTML = '';
+                empty.classList.remove('hidden');
+                summary.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">Nenhum item no carrinho.</p>';
+                subtotalEl.textContent = moeda(0);
+                totalEl.textContent = moeda(0);
+                countLabel.textContent = '';
+                return;
+            }
+
+            empty.classList.add('hidden');
+            countLabel.textContent = `(${carrinho.length} ${carrinho.length === 1 ? 'item' : 'itens'})`;
+
+            const total = calcularTotais();
+            const qtyTotal = carrinho.reduce((s, i) => s + i.qty, 0);
+
+            // Frete grátis acima de 100 unidades
+            const freteGratis = qtyTotal >= 100;
+            freteEl.textContent = freteGratis ? 'GRÁTIS 🎉' : 'A combinar';
+            freteEl.className = freteGratis ? 'text-green-600 font-black' : 'text-gray-500 font-semibold';
+
+            // ── Linhas da tabela ──
+            list.innerHTML = carrinho.map(item => {
+                const subtItem = moeda(item.preco * item.qty);
+                return `
+    <div class="cart-row grid grid-cols-[64px_1fr] sm:grid-cols-[80px_1fr_120px_110px_40px] gap-3 sm:gap-4 items-center px-4 sm:px-6 py-3 border-b border-gray-50 last:border-0">
+      <!-- Imagem -->
+      <img src="${item.img}" alt="${item.nome}" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl border border-gray-100 shadow-sm" />
+
+      <!-- Nome + preço unitário (mobile) -->
+      <div class="flex flex-col justify-center">
+        <p class="font-bold text-sm sm:text-base text-brand-dark leading-tight">${item.nome}</p>
+        <p class="text-gray-400 text-xs mt-0.5">${moeda(item.preco)} / unidade</p>
+        <p class="text-brand-red font-black text-sm sm:hidden mt-1">${subtItem}</p>
+      </div>
+
+      <!-- Preço (desktop) -->
+      <div class="hidden sm:flex flex-col items-center">
+        <p class="font-semibold text-sm">${moeda(item.preco)}</p>
+        <p class="text-gray-400 text-xs">/ un.</p>
+      </div>
+
+      <!-- Quantidade – com trava MIN_QTY -->
+      <div class="hidden sm:flex items-center gap-1 justify-center">
+        <button onclick="alterarQtyCarrinho('${item.id}', ${item.qty - 5})"
+          class="w-7 h-7 rounded-full bg-gray-100 hover:bg-red-100 text-brand-red font-bold text-sm flex items-center justify-center border border-gray-200 transition">−</button>
+        <input type="number" value="${item.qty}" min="${MIN_QTY}" step="5"
+          onchange="alterarQtyCarrinho('${item.id}', this.value)"
+          class="w-14 text-center border border-gray-200 rounded-lg py-1 font-bold text-sm focus:outline-none focus:ring-1 focus:ring-brand-red" />
+        <button onclick="alterarQtyCarrinho('${item.id}', ${item.qty + 5})"
+          class="w-7 h-7 rounded-full bg-gray-100 hover:bg-green-100 text-green-700 font-bold text-sm flex items-center justify-center border border-gray-200 transition">+</button>
+      </div>
+
+      <!-- Remover -->
+      <div class="hidden sm:flex justify-center">
+        <button onclick="removerItem('${item.id}')"
+          title="Remover item"
+          class="w-8 h-8 rounded-full bg-red-50 hover:bg-brand-red hover:text-white text-brand-red text-sm flex items-center justify-center transition border border-red-100">✕</button>
+      </div>
+    </div>`;
+            }).join('');
+
+            // ── Resumo do card lateral ──
+            summary.innerHTML = carrinho.map(item => `
+    <div class="flex justify-between text-sm">
+      <span class="text-gray-600 truncate max-w-[180px]">${item.nome} <span class="text-gray-400">(${item.qty}un.)</span></span>
+      <span class="font-bold text-brand-dark whitespace-nowrap ml-2">${moeda(item.preco * item.qty)}</span>
+    </div>
+  `).join('');
+
+            subtotalEl.textContent = moeda(total);
+            totalEl.textContent = moeda(total);
+            atualizarResumoSelects();
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           ATUALIZAR RESUMO DOS SELECTS NO CARD
+        ───────────────────────────────────────────────────────── */
+        function atualizarResumoSelects() {
+            const pag = document.getElementById('pagamento').value;
+            const est = document.getElementById('estado').value;
+            const div = document.getElementById('summary-selects');
+            const sumP = document.getElementById('sum-pagamento');
+            const sumE = document.getElementById('sum-estado');
+
+            if (pag || est) {
+                div.classList.remove('hidden');
+                sumP.textContent = pag || '—';
+                sumE.textContent = est || '—';
+            } else {
+                div.classList.add('hidden');
+            }
+        }
+
+        // Atualiza o resumo quando o usuário muda os selects
+        document.getElementById('pagamento').addEventListener('change', atualizarResumoSelects);
+        document.getElementById('estado').addEventListener('change', atualizarResumoSelects);
+
+        /* ─────────────────────────────────────────────────────────
+           ENVIAR PEDIDO VIA WHATSAPP
+           Coleta todos os dados do carrinho + selects, formata
+           a mensagem e abre o link wa.me/ com a mensagem codificada.
+        ───────────────────────────────────────────────────────── */
+        function enviarWhatsApp() {
+            // Validação dos campos obrigatórios
+            const pagamento = document.getElementById('pagamento').value;
+            const estado = document.getElementById('estado').value;
+            const obs = document.getElementById('obs').value.trim();
+
+            if (carrinho.length === 0) {
+                alert('⚠️ Seu carrinho está vazio!');
+                return;
+            }
+            if (!pagamento) {
+                document.getElementById('pagamento').focus();
+                document.getElementById('pagamento').classList.add('border-red-500');
+                alert('⚠️ Por favor, selecione a forma de pagamento.');
+                return;
+            }
+            if (!estado) {
+                document.getElementById('estado').focus();
+                document.getElementById('estado').classList.add('border-red-500');
+                alert('⚠️ Por favor, selecione o estado do salgado (Fritos ou Congelados).');
+                return;
+            }
+
+            /* ── FORMATAÇÃO DA MENSAGEM ──
+               Cada linha segue o formato:
+               • PRODUTO – Qty un. = R$ Total
+            */
+            const total = calcularTotais();
+            const qtyTotal = carrinho.reduce((s, i) => s + i.qty, 0);
+
+            let msg = '*PEDIDO – Salgados Dona Sogra*\n';
+            msg += '─────────────────────\n';
+
+            carrinho.forEach(item => {
+                const sub = (item.preco * item.qty).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                msg += `• *${item.nome}*\n`;
+                msg += `  ${item.qty} un. × ${item.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} = ${sub}\n`;
+            });
+
+            msg += '─────────────────────\n';
+            msg += ` *Total de unidades:* ${qtyTotal}\n`;
+            msg += ` *Valor total:* ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n`;
+            msg += ` *Pagamento:* ${pagamento}\n`;
+            msg += ` *Estado:* ${estado}\n`;
+
+            if (obs) {
+                msg += `📝 *Obs:* ${obs}\n`;
+            }
+
+            msg += '─────────────────────\n';
+            msg += '_Pedido enviado pelo site Salgados Dona Sogra_ 🍽';
+
+            // Gera o link wa.me com a mensagem codificada
+            const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           INICIALIZAÇÃO
+        ───────────────────────────────────────────────────────── */
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarCarrinho();
+        });
+    </script>
+</body>
+
+</html>
