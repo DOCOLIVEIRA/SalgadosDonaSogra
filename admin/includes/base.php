@@ -15,9 +15,7 @@ function render_admin_header($title = 'Painel', $page_title = 'Painel')
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>
-            <?= htmlspecialchars($title) ?> – Dona Sogra Admin
-        </title>
+        <title><?= htmlspecialchars($title) ?> – Dona Sogra Admin</title>
         <link rel="icon" type="image/png" href="/img/logo.png">
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;900&display=swap"
@@ -448,16 +446,10 @@ function render_admin_header($title = 'Painel', $page_title = 'Painel')
 
             <div class="sidebar-footer">
                 <div class="user-info">
-                    <div class="user-avatar">
-                        <?= strtoupper(substr($_SESSION['username'], 0, 1)) ?>
-                    </div>
+                    <div class="user-avatar"><?= strtoupper(substr($_SESSION['usuario'], 0, 1)) ?></div>
                     <div class="user-details">
-                        <p>
-                            <?= htmlspecialchars($_SESSION['username']) ?>
-                        </p>
-                        <span>
-                            <?= htmlspecialchars($_SESSION['user_role']) ?>
-                        </span>
+                        <p><?= htmlspecialchars($_SESSION['usuario']) ?></p>
+                        <span><?= htmlspecialchars($_SESSION['nivel_acesso']) ?></span>
                     </div>
                 </div>
                 <a href="/admin/logout.php" class="btn-logout">⎋ Sair do sistema</a>
@@ -466,13 +458,9 @@ function render_admin_header($title = 'Painel', $page_title = 'Painel')
 
         <div class="main-content">
             <div class="topbar">
-                <h1>
-                    <?= htmlspecialchars($page_title) ?>
-                </h1>
+                <h1><?= htmlspecialchars($page_title) ?></h1>
                 <div class="topbar-right">
-                    <span class="badge-role">
-                        <?= htmlspecialchars($_SESSION['user_role']) ?>
-                    </span>
+                    <span class="badge-role"><?= htmlspecialchars($_SESSION['nivel_acesso']) ?></span>
                 </div>
             </div>
             <div class="page-body">

@@ -21,18 +21,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Por favor, preencha usuário e senha.';
     } else {
         $pdo = get_connection();
-        // Busca o usuário. Observe o uso do "?" para evitar SQL Injection.
-        $stmt = $pdo->prepare("SELECT id, username, password_hash, role, is_active FROM users WHERE username = ? LIMIT 1");
+        // Busca o usuário na tabela 'usuarios'
+        $stmt = $pdo->prepare("SELECT id, usuario, senha_hash, nivel_acesso, ativo FROM usuarios WHERE usuario = ? LIMIT 1");
         $stmt->execute([$username]);
         $user = $stmt->fetch();
 
-        if ($user && $user['is_active']) {
-            // Verifica a senha usando a função nativa do PHP (que lê o hash criado pelo password_hash)
-            if (password_verify($password, $user['password_hash'])) {
+        if ($user && $user['ativo']) {
+            // Verifica a senha
+            if (password_verify($password, $user['senha_hash'])) {
                 // Senha correta, cria a sessão
                 $_SESSION['user_id'] = $user['id'];
-                $_SESSION['username'] = $user['username'];
-                $_SESSION['user_role'] = $user['role'];
+                $_SESSION['usuario'] = $user['usuario'];
+                $_SESSION['nivel_acesso'] = $user['nivel_acesso'];
 
                 // Redireciona
                 header("Location: index.php");
@@ -167,9 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <p>Insira suas credenciais para continuar.</p>
 
         <?php if ($error): ?>
-            <div class="error-msg">
-                <?= htmlspecialchars($error) ?>
-            </div>
+            <div class="error-msg"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
 
         <form method="POST" action="login.php">

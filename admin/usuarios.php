@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($username && $password) {
             // Verifica duplicidade
-            $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
+            $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE usuario = ?");
             $stmt->execute([$username]);
 
             if ($stmt->fetch()) {
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 // Insere com Hash BCRYPT
                 $hash = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $pdo->prepare("INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)");
+                $stmt = $pdo->prepare("INSERT INTO usuarios (usuario, senha_hash, nivel_acesso) VALUES (?, ?, ?)");
                 $stmt->execute([$username, $hash, $role]);
                 $_SESSION['flash'] = "Usuário '$username' cadastrado com sucesso!";
             }
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($acao === 'toggle') {
         $user_id = $_POST['user_id'] ?? null;
         if ($user_id && $user_id != $_SESSION['user_id']) { // Impede desativar a si próprio
-            $stmt = $pdo->prepare("UPDATE users SET is_active = NOT is_active WHERE id = ?");
+            $stmt = $pdo->prepare("UPDATE usuarios SET ativo = NOT ativo WHERE id = ?");
             $stmt->execute([$user_id]);
             $_SESSION['flash'] = "Status do usuário modificado!";
         } else {
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Lista os usuários
-$usuarios = $pdo->query("SELECT * FROM users ORDER BY created_at DESC")->fetchAll();
+$usuarios = $pdo->query("SELECT * FROM usuarios ORDER BY criado_em DESC")->fetchAll();
 
 render_admin_header('Usuários', '👥 Gestão de Acessos');
 ?>
@@ -79,23 +79,19 @@ render_admin_header('Usuários', '👥 Gestão de Acessos');
                             <td>
                                 <div style="display:flex; align-items:center; gap:0.6rem;">
                                     <div class="user-avatar" style="width:28px; height:28px; font-size:0.75rem;">
-                                        <?= strtoupper(substr($u['username'], 0, 1)) ?>
+                                        <?= strtoupper(substr($u['usuario'], 0, 1)) ?>
                                     </div>
-                                    <span style="font-weight:700; color:#ddd;">
-                                        <?= htmlspecialchars($u['username']) ?>
-                                    </span>
+                                    <span style="font-weight:700; color:#ddd;"><?= htmlspecialchars($u['usuario']) ?></span>
                                 </div>
                             </td>
                             <td>
-                                <span class="badge-role">
-                                    <?= htmlspecialchars($u['role']) ?>
-                                </span>
+                                <span class="badge-role"><?= htmlspecialchars($u['nivel_acesso']) ?></span>
                             </td>
                             <td style="color:#888; font-size:0.85rem;">
-                                <?= date('d/m/Y', strtotime($u['created_at'])) ?>
+                                <?= date('d/m/Y', strtotime($u['criado_em'])) ?>
                             </td>
                             <td>
-                                <?php if ($u['is_active']): ?>
+                                <?php if ($u['ativo']): ?>
                                     <span class="status-badge status-Entregue">Ativo</span>
                                 <?php else: ?>
                                     <span class="status-badge status-Cancelado">Inativo</span>
@@ -106,9 +102,9 @@ render_admin_header('Usuários', '👥 Gestão de Acessos');
                                     <form method="POST" action="usuarios.php">
                                         <input type="hidden" name="acao" value="toggle">
                                         <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
-                                        <button type="submit" class="btn <?= $u['is_active'] ? 'btn-danger' : 'btn-success' ?>"
+                                        <button type="submit" class="btn <?= $u['ativo'] ? 'btn-danger' : 'btn-success' ?>"
                                             style="padding:0.3rem 0.6rem; font-size:0.75rem;">
-                                            <?= $u['is_active'] ? '🚫 Desativar' : '✅ Reativar' ?>
+                                            <?= $u['ativo'] ? '🚫 Desativar' : '✅ Reativar' ?>
                                         </button>
                                     </form>
                                 <?php else: ?>

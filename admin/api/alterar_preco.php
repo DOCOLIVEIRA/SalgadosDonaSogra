@@ -9,11 +9,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die("Método não permitido.");
 }
 
-$product_id = $_POST['product_id'] ?? null;
+$produto_id = $_POST['produto_id'] ?? null;
 $novo_preco = $_POST['novo_preco'] ?? null;
 $confirmado = $_POST['confirmado'] ?? '';
 
-if (!$product_id || !$novo_preco || $novo_preco <= 0 || $confirmado !== 'sim') {
+if (!$produto_id || !$novo_preco || $novo_preco <= 0 || $confirmado !== 'sim') {
     $_SESSION['flash'] = "Dados inválidos ou alteração não confirmada.";
     header("Location: ../produtos.php");
     exit();
@@ -26,8 +26,8 @@ try {
     $pdo->beginTransaction();
 
     // Pega o preço atual
-    $stmt = $pdo->prepare("SELECT nome, preco_unitario FROM products WHERE id = ?");
-    $stmt->execute([$product_id]);
+    $stmt = $pdo->prepare("SELECT nome, preco_unitario FROM produtos WHERE id = ?");
+    $stmt->execute([$produto_id]);
     $produto = $stmt->fetch();
 
     if (!$produto) {
@@ -36,13 +36,13 @@ try {
 
     $preco_anterior = $produto['preco_unitario'];
 
-    // 1. Loga a mudança na tabela price_logs
-    $stmtLog = $pdo->prepare("INSERT INTO price_logs (product_id, preco_anterior, preco_novo, changed_by_id) VALUES (?, ?, ?, ?)");
-    $stmtLog->execute([$product_id, $preco_anterior, $novo_preco, $_SESSION['user_id']]);
+    // 1. Loga a mudança na tabela historico_precos
+    $stmtLog = $pdo->prepare("INSERT INTO historico_precos (produto_id, preco_anterior, preco_novo, alterado_por_id) VALUES (?, ?, ?, ?)");
+    $stmtLog->execute([$produto_id, $preco_anterior, $novo_preco, $_SESSION['user_id']]);
 
-    // 2. Atualiza o preço na tabela products
-    $stmtUpdate = $pdo->prepare("UPDATE products SET preco_unitario = ? WHERE id = ?");
-    $stmtUpdate->execute([$novo_preco, $product_id]);
+    // 2. Atualiza o preço na tabela produtos
+    $stmtUpdate = $pdo->prepare("UPDATE produtos SET preco_unitario = ? WHERE id = ?");
+    $stmtUpdate->execute([$novo_preco, $produto_id]);
 
     $pdo->commit();
     $_SESSION['flash'] = "✅ Preço de '{$produto['nome']}' alterado de R$ " . number_format($preco_anterior, 2, ',', '.') . " para R$ " . number_format($novo_preco, 2, ',', '.') . ".";

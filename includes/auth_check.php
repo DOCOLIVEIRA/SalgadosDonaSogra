@@ -21,7 +21,7 @@ if (!isset($_SESSION['user_id'])) {
 // Helpers para verificar permissão
 function is_admin()
 {
-    return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
+    return isset($_SESSION['nivel_acesso']) && $_SESSION['nivel_acesso'] === 'admin';
 }
 
 function require_admin()

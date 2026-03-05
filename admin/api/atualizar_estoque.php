@@ -9,10 +9,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die("Método não permitido.");
 }
 
-$product_id = $_POST['product_id'] ?? null;
+$produto_id = $_POST['produto_id'] ?? null;
 $quantidade = $_POST['quantidade'] ?? null;
 
-if (!$product_id || $quantidade === null || $quantidade < 0) {
+if (!$produto_id || $quantidade === null || $quantidade < 0) {
     $_SESSION['flash'] = "Dados inválidos para atualizar o estoque.";
     header("Location: ../produtos.php");
     exit();
@@ -21,8 +21,8 @@ if (!$product_id || $quantidade === null || $quantidade < 0) {
 $pdo = get_connection();
 
 try {
-    $stmt = $pdo->prepare("UPDATE products SET quantidade_estoque = ? WHERE id = ?");
-    $stmt->execute([$quantidade, $product_id]);
+    $stmt = $pdo->prepare("UPDATE produtos SET estoque_atual = ? WHERE id = ?");
+    $stmt->execute([$quantidade, $produto_id]);
     $_SESSION['flash'] = "✅ Estoque atualizado para $quantidade unidades.";
 } catch (Exception $e) {
     $_SESSION['flash'] = "❌ Erro ao atualizar estoque: " . $e->getMessage();

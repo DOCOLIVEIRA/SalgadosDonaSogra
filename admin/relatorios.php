@@ -15,14 +15,14 @@ $data_inicio = $data_inicio_str . " 00:00:00";
 $data_fim = $data_fim_str . " 23:59:59";
 
 // ── 1. CARD CONTÁBIL MENSAL (Pedido do Usuário) ─────────────────────────
-// Faturamento usando SELECT SUM(valor_total) FROM pedidos WHERE MONTH(data) = MONTH(CURRENT_DATE())
+// Faturamento usando SELECT SUM(valor_total) FROM pedidos WHERE MONTH(criado_em) = MONTH(CURRENT_DATE())
 $sql_contabil = "
     SELECT 
-        SUM(total) as faturamento_mes,
+        SUM(valor_total) as faturamento_mes,
         COUNT(id) as qtd_transacoes
-    FROM orders 
-    WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
-      AND YEAR(created_at) = YEAR(CURRENT_DATE())
+    FROM pedidos 
+    WHERE MONTH(criado_em) = MONTH(CURRENT_DATE())
+      AND YEAR(criado_em) = YEAR(CURRENT_DATE())
       AND status != 'Cancelado'
 ";
 $contabil = $pdo->query($sql_contabil)->fetch();
@@ -33,10 +33,10 @@ $qtd_transacoes = $contabil['qtd_transacoes'] ?: 0;
 // ── 2. FINANCEIRO DO PERÍODO SELECIONADO ──────────────────────────────────
 $sql_financeiro = "
     SELECT 
-        SUM(total) as total_vendas, 
+        SUM(valor_total) as total_vendas, 
         COUNT(id) as qtd_pedidos 
-    FROM orders 
-    WHERE created_at BETWEEN ? AND ? 
+    FROM pedidos 
+    WHERE criado_em BETWEEN ? AND ? 
       AND status != 'Cancelado'
 ";
 $stmt = $pdo->prepare($sql_financeiro);
@@ -47,7 +47,7 @@ $total_vendas = $fin['total_vendas'] ?: 0.00;
 $qtd_pedidos = $fin['qtd_pedidos'] ?: 0;
 $ticket_medio = $qtd_pedidos > 0 ? ($total_vendas / $qtd_pedidos) : 0.00;
 
-$stmt_canc = $pdo->prepare("SELECT COUNT(*) FROM orders WHERE created_at BETWEEN ? AND ? AND status = 'Cancelado'");
+$stmt_canc = $pdo->prepare("SELECT COUNT(*) FROM pedidos WHERE criado_em BETWEEN ? AND ? AND status = 'Cancelado'");
 $stmt_canc->execute([$data_inicio, $data_fim]);
 $total_cancelados = $stmt_canc->fetchColumn();
 
@@ -58,10 +58,10 @@ $sql_abc = "
     SELECT 
         p.nome, 
         SUM(i.quantidade) as total_unidades,
-        SUM(i.quantidade * i.preco_unitario_snapshot) as receita_total
-    FROM products p 
-    JOIN order_items i ON p.id = i.product_id
-    JOIN orders o ON o.id = i.order_id
+        SUM(i.quantidade * i.preco_unitario) as receita_total
+    FROM produtos p 
+    JOIN itens_pedido i ON p.id = i.produto_id
+    JOIN pedidos o ON o.id = i.pedido_id
     WHERE o.status != 'Cancelado'
     GROUP BY p.id
     ORDER BY receita_total DESC
@@ -94,11 +94,11 @@ $sql_historico = "
     SELECT 
         l.*, 
         p.nome as produto_nome, 
-        u.username as changed_by_nome
-    FROM price_logs l
-    JOIN products p ON l.product_id = p.id
-    JOIN users u ON l.changed_by_id = u.id
-    ORDER BY l.changed_at DESC LIMIT 100
+        u.usuario as changed_by_nome
+    FROM historico_precos l
+    JOIN produtos p ON l.produto_id = p.id
+    JOIN usuarios u ON l.alterado_por_id = u.id
+    ORDER BY l.alterado_em DESC LIMIT 100
 ";
 $historico_precos = $pdo->query($sql_historico)->fetchAll();
 
@@ -149,10 +149,7 @@ render_admin_header('Relatórios', '📊 Inteligência e Relatórios');
             <span style="font-size:1.5rem;">📅</span>
             <div>
                 <h2 style="color:#e74c3c;">Relatório Contábil do Mês Atual</h2>
-                <span style="color:#aaa; font-size:0.8rem;">
-                    <?= date('01/m/Y') ?> até
-                    <?= date('t/m/Y') ?>
-                </span>
+                <span style="color:#aaa; font-size:0.8rem;"><?= date('01/m/Y') ?> até <?= date('t/m/Y') ?></span>
             </div>
         </div>
         <button class="btn btn-primary no-print" onclick="window.print()">🖨 Imprimir / PDF</button>
@@ -164,17 +161,14 @@ render_admin_header('Relatórios', '📊 Inteligência e Relatórios');
                 style="color:#888; font-size:0.85rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem;">
                 Faturamento Bruto</div>
             <div style="color:#fff; font-size:2.5rem; font-weight:900;">R$
-                <?= number_format($faturamento_mes, 2, ',', '.') ?>
-            </div>
+                <?= number_format($faturamento_mes, 2, ',', '.') ?></div>
         </div>
         <div style="width:1px; background:#333;"></div>
         <div>
             <div
                 style="color:#888; font-size:0.85rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.5rem;">
                 Transações Realizadas</div>
-            <div style="color:#C0392B; font-size:2.5rem; font-weight:900;">
-                <?= $qtd_transacoes ?>
-            </div>
+            <div style="color:#C0392B; font-size:2.5rem; font-weight:900;"><?= $qtd_transacoes ?></div>
             <div style="color:#555; font-size:0.8rem;">pedidos finalizados</div>
         </div>
     </div>
@@ -206,25 +200,17 @@ render_admin_header('Relatórios', '📊 Inteligência e Relatórios');
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-label">💰 Vendas do Período</div>
-            <div class="stat-value" style="font-size:1.4rem;">R$
-                <?= number_format($total_vendas, 2, ',', '.') ?>
-            </div>
-            <div class="stat-sub">
-                <?= $qtd_pedidos ?> pedidos finalizados
-            </div>
+            <div class="stat-value" style="font-size:1.4rem;">R$ <?= number_format($total_vendas, 2, ',', '.') ?></div>
+            <div class="stat-sub"><?= $qtd_pedidos ?> pedidos finalizados</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">🎫 Ticket Médio</div>
-            <div class="stat-value" style="font-size:1.4rem;">R$
-                <?= number_format($ticket_medio, 2, ',', '.') ?>
-            </div>
+            <div class="stat-value" style="font-size:1.4rem;">R$ <?= number_format($ticket_medio, 2, ',', '.') ?></div>
             <div class="stat-sub">por pedido</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">❌ Cancelamentos</div>
-            <div class="stat-value" style="color:#e74c3c; font-size:1.4rem;">
-                <?= $total_cancelados ?>
-            </div>
+            <div class="stat-value" style="color:#e74c3c; font-size:1.4rem;"><?= $total_cancelados ?></div>
             <div class="stat-sub">pedidos cancelados</div>
         </div>
     </div>
@@ -251,15 +237,10 @@ render_admin_header('Relatórios', '📊 Inteligência e Relatórios');
                     <tbody>
                         <?php foreach ($curva_abc as $row): ?>
                             <tr>
-                                <td style="font-weight:600; color:#ddd;">
-                                    <?= htmlspecialchars($row['nome']) ?>
-                                </td>
-                                <td style="text-align:right; color:#888;">
-                                    <?= $row['total_unidades'] ?> un.
-                                </td>
+                                <td style="font-weight:600; color:#ddd;"><?= htmlspecialchars($row['nome']) ?></td>
+                                <td style="text-align:right; color:#888;"><?= $row['total_unidades'] ?> un.</td>
                                 <td style="text-align:right; color:#F0A500; font-weight:700;">
-                                    R$
-                                    <?= number_format($row['receita_total'], 2, ',', '.') ?>
+                                    R$ <?= number_format($row['receita_total'], 2, ',', '.') ?>
                                 </td>
                                 <td style="text-align:center;">
                                     <?php if ($row['classe'] == 'A'): ?>
@@ -297,21 +278,17 @@ render_admin_header('Relatórios', '📊 Inteligência e Relatórios');
                         <?php foreach ($historico_precos as $log): ?>
                             <tr>
                                 <td style="font-size:0.75rem; color:#888; white-space:nowrap;">
-                                    <?= date('d/m/y H:i', strtotime($log['changed_at'])) ?>
+                                    <?= date('d/m/y H:i', strtotime($log['alterado_em'])) ?>
                                 </td>
-                                <td style="font-weight:600; color:#ddd;">
-                                    <?= htmlspecialchars($log['produto_nome']) ?>
-                                </td>
+                                <td style="font-weight:600; color:#ddd;"><?= htmlspecialchars($log['produto_nome']) ?></td>
                                 <td>
                                     <div
                                         style="display:flex; align-items:center; gap:0.4rem; font-size:0.85rem; white-space:nowrap;">
                                         <span style="color:#555;">R$
-                                            <?= number_format($log['preco_anterior'], 2, ',', '.') ?>
-                                        </span>
+                                            <?= number_format($log['preco_anterior'], 2, ',', '.') ?></span>
                                         <span style="color:#C0392B;">→</span>
                                         <span style="color:#2ecc71; font-weight:700;">R$
-                                            <?= number_format($log['preco_novo'], 2, ',', '.') ?>
-                                        </span>
+                                            <?= number_format($log['preco_novo'], 2, ',', '.') ?></span>
                                     </div>
                                 </td>
                                 <td style="color:#555; font-size:0.8rem;">
