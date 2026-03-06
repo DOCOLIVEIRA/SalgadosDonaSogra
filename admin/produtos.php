@@ -103,17 +103,6 @@ render_admin_header('Produtos & Estoque', '🥟 Produtos & Controle de Estoque')
 </div>
 
 <!-- Modal de Preço e Scripts específicos para Produtos -->
-<style>
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); z-index: 999; align-items: center; justify-content: center; }
-    .modal-overlay.open { display: flex; }
-    .modal { background: #1a1a1a; border: 1px solid #333; border-radius: 16px; padding: 2rem; max-width: 420px; width: 90%; animation: slideUp 0.25s ease; }
-    .modal h3 { color: #fff; font-size: 1.1rem; font-weight: 800; margin-bottom: 0.75rem; }
-    .modal p { color: #aaa; font-size: 0.9rem; line-height: 1.55; margin-bottom: 1.5rem; }
-    .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; }
-    .form-group { margin-bottom: 1rem; }
-    .form-label { display: block; color: #888; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.4rem; }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-</style>
 
 <div class="modal-overlay" id="precoModal">
     <div class="modal">
@@ -146,27 +135,5 @@ render_admin_header('Produtos & Estoque', '🥟 Produtos & Controle de Estoque')
     </div>
 </div>
 
-<script>
-    function abrirModalPreco(productId, nome, precoAtual) {
-        document.getElementById('precoModalDesc').textContent = `Produto: ${nome} | Preço atual: R$ ${precoAtual.toFixed(2)}/un. (R$ ${(precoAtual * 100).toFixed(2)}/cento)`;
-        document.getElementById('novoPrecoInput').value = precoAtual.toFixed(2);
-        document.getElementById('precoCento').textContent = (precoAtual * 100).toFixed(2);
-        document.getElementById('modalProductId').value = productId;
-        document.getElementById('precoModal').classList.add('open');
-    }
-
-    function fecharModalPreco() {
-        document.getElementById('precoModal').classList.remove('open');
-    }
-
-    document.getElementById('novoPrecoInput').addEventListener('input', function () {
-        const v = parseFloat(this.value) || 0;
-        document.getElementById('precoCento').textContent = (v * 100).toFixed(2);
-    });
-
-    document.getElementById('precoModal').addEventListener('click', function (e) {
-        if (e.target === this) fecharModalPreco();
-    });
-</script>
 
 <?php render_admin_footer(); ?>

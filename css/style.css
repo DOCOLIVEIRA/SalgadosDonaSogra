@@ -1,0 +1,93 @@
+/* ── Estilos globais para a Loja ── */
+
+/* ── Carousel ── */
+.carousel-track {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(.25, .8, .25, 1);
+}
+
+.carousel-slide {
+    min-width: 100%;
+    /* ── Faz a imagem de fundo preencher o slide inteiro ── */
+    background-size: cover;
+    /* estica a img para cobrir tudo */
+    background-position: center;
+    /* centraliza a imagem */
+    position: relative;
+    /* necessário para o overlay absoluto */
+}
+
+/* ── Overlay escuro sobre a imagem para o texto ficar legível ── */
+.carousel-slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    /* cobre 100% do slide */
+    background: rgba(0, 0, 0, 0.45);
+    /* preto 45% de opacidade */
+    z-index: 0;
+}
+
+/* ── Conteúdo do slide acima do overlay ── */
+.carousel-slide>div.text-center {
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Quantity Control Pulse ── */
+@keyframes qty-warn {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.04);
+    }
+}
+
+.qty-warn {
+    animation: qty-warn .3s ease-in-out 2;
+}
+
+/* ── Card hover ── */
+.product-card {
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, .15);
+}
+
+/* ── Floating cart badge ── */
+#cart-fab {
+    transition: transform .2s ease;
+}
+
+#cart-fab:hover {
+    transform: scale(1.1);
+}
+
+/* Sticky order summary card (Carrinho) */
+@media (min-width: 1024px) {
+    .summary-sticky {
+        position: sticky;
+        top: 90px;
+    }
+}
+
+/* Smooth row hover (Carrinho) */
+.cart-row {
+    transition: background .15s ease;
+}
+
+.cart-row:hover {
+    background: #fff8f0;
+}
+
+/* ── Largura mínima – evita layout quebrado em telas muito pequenas ── */
+body {
+    min-width: 320px;
+}

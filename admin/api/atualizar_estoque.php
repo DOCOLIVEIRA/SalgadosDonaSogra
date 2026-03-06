@@ -2,8 +2,8 @@
 // ============================================================================
 // admin/api/atualizar_estoque.php
 // ============================================================================
-require_once __DIR__ . '/../../includes/auth_check.php';
-require_once __DIR__ . '/../../db.php';
+require_once __DIR__ . '/../../php/includes/auth_check.php';
+require_once __DIR__ . '/../../db/db.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die("Método não permitido.");

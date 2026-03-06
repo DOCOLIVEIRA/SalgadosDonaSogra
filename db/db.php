@@ -6,7 +6,7 @@
 // Usamos PDO pois previne Injeção de SQL e funciona muito bem com mysql.
 // ============================================================================
 
-require_once 'config.php';
+require_once __DIR__ . '/../php/config.php';
 
 function get_connection() {
     static $pdo = null;

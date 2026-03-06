@@ -1,0 +1,31 @@
+/* Estilos para o modo de Impressão do Relatório Contábil */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .sidebar,
+    .topbar {
+        display: none !important;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+    }
+
+    #area-impressao,
+    #area-impressao * {
+        visibility: visible;
+    }
+
+    #area-impressao {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+}

@@ -106,39 +106,7 @@ $historico_precos = $pdo->query($sql_historico)->fetchAll();
 render_admin_header('Relatórios', '📊 Inteligência e Relatórios');
 ?>
 
-<style>
-    /* Estilos para o modo de Impressão do Relatório Contábil */
-    @media print {
-        body * {
-            visibility: hidden;
-        }
 
-        .sidebar,
-        .topbar {
-            display: none !important;
-        }
-
-        .main-content {
-            margin-left: 0 !important;
-        }
-
-        #area-impressao,
-        #area-impressao * {
-            visibility: visible;
-        }
-
-        #area-impressao {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-        }
-
-        .no-print {
-            display: none !important;
-        }
-    }
-</style>
 
 <!-- =========================================================================
      CARD CONTÁBIL MENSAL (Destaque Principal)
