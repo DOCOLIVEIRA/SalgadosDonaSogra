@@ -18,12 +18,16 @@ $faturamento_hoje = $stmt->fetchColumn() ?: 0.00;
 
 // Buscar últimos 50 pedidos 
 // Fazemos um LEFT JOIN com usuarios para pegar quem cancelou
-$sql_pedidos = "
-    SELECT p.*, u.usuario as cancelado_por_nome 
-    FROM pedidos p 
-    LEFT JOIN usuarios u ON p.cancelado_por_id = u.id 
-    ORDER BY p.criado_em DESC 
-    LIMIT 50
+$sql_pedidos = " SELECT 
+                    p.*, 
+                    u.usuario as cancelado_por_nome 
+                FROM 
+                    pedidos p 
+                LEFT JOIN 
+                    usuarios u ON p.cancelado_por_id = u.id 
+                ORDER BY 
+                    p.criado_em DESC 
+                LIMIT 50
 ";
 $stmt = $pdo->query($sql_pedidos);
 $pedidos = $stmt->fetchAll();
