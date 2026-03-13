@@ -3,21 +3,21 @@
    preco = valor por UNIDADE (R$80,00 / 100 = R$0,80)
 ───────────────────────────────────────────────────────── */
 const PRODUTOS = [
-    { id: 'coxinha de frango', nome: 'Coxinha de Frango', desc: 'Massa crocante, recheio de frango desfiado temperado.', preco: 0.70, img: 'img/coxinha.png' },
+    { id: 'coxinha de frango', nome: 'Coxinha de Frango', desc: 'Massa crocante, recheio de frango desfiado temperado.', preco: 0.85, img: 'img/coxinha.png' },
     { id: 'coxinha de carne', nome: 'Coxinha de Carne', desc: 'Coxinha frita com recheio de carne moída temperada.', preco: 0.85, img: 'img/coxinha_de_carne.png' },
-    { id: 'kibe', nome: 'Kibe', desc: 'Kibe tradicional, crocante por fora e suculento por dentro.', preco: 0.70, img: 'img/kibe.png' },
+    { id: 'kibe', nome: 'Kibe', desc: 'Kibe tradicional, crocante por fora e suculento por dentro.', preco: 0.85, img: 'img/kibe.png' },
     { id: 'kibe com queijo', nome: 'Kibolinha', desc: 'Kibe com queijo, crocante por fora com queijo derretido por dentro.', preco: 0.85, img: 'img/kibolinha.png' },
-    { id: 'fataya', nome: 'Fataya', desc: 'Massa com recheio cremoso de carne moída temperada.', preco: 1.10, img: 'img/fataya.png' },
-    { id: 'croquete de salsicha', nome: 'Croquete de Salsicha', desc: 'Crocante por fora com recheio cremoso de salsicha por dentro.', preco: 0.70, img: 'img/croquete_de_salsicha.png' },
-    { id: 'bolinha de queijo', nome: 'Bolinha de Queijo', desc: 'Bolinhas crocantes com mozzarella derretida por dentro.', preco: 0.80, img: 'img/bolinha_queijo.png' },
-    { id: 'bolinho de bacalhau', nome: 'Bolinho de Bacalhau', desc: 'Crocante por fora com recheio cremoso de bacalhau por dentro.', preco: 1.00, img: 'img/bolinho_de_bacalhau.png' },
-    { id: 'almofadinha de calabresa e queijo', nome: 'Almofadinha de Calabresa e Queijo', desc: 'Crocante por fora com recheio cremoso de calabresa e queijo por dentro.', preco: 0.80, img: 'img/almofadinha_calabresa_e_queijo.png' },
+    { id: 'fataya', nome: 'Fataya', desc: 'Massa com recheio cremoso de carne moída temperada.', preco: 1.00, img: 'img/fataya.jpeg' },
+    { id: 'croquete de salsicha', nome: 'Croquete de Salsicha', desc: 'Crocante por fora com recheio cremoso de salsicha por dentro.', preco: 0.85, img: 'img/croquete_de_salsicha.png' },
+    { id: 'bolinha de queijo', nome: 'Bolinha de Queijo', desc: 'Bolinhas crocantes com mozzarella derretida por dentro.', preco: 0.85, img: 'img/bolinha_queijo.jpg' },
+    { id: 'bolinho de bacalhau', nome: 'Bolinho de Bacalhau', desc: 'Crocante por fora com recheio cremoso de bacalhau por dentro.', preco: 0.85, img: 'img/bolinho_de_bacalhau.jpg' },
+    { id: 'almofadinha de calabresa e queijo', nome: 'Almofadinha de Calabresa e Queijo', desc: 'Crocante por fora com recheio cremoso de calabresa e queijo por dentro.', preco: 0.85, img: 'img/almofadinha_calabresa_e_queijo.jpg' },
 ];
 
 /* ─────────────────────────────────────────────────────────
    CONSTANTES
 ───────────────────────────────────────────────────────── */
-const MIN_QTY = 25;
+const MIN_QTY = 50;
 const WHATSAPP_NUMBER = '5514996748488'; // ← Altere aqui
 
 /* ─────────────────────────────────────────────────────────
@@ -161,7 +161,7 @@ function renderizarProdutos() {
 
     grid.innerHTML = PRODUTOS.map(p => {
         const precoCentoFmt = (p.preco * 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        const precoMinFmt = (p.preco * 25).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const precoMinFmt = (p.preco * 50).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         return `
 <article class="product-card bg-white rounded-2xl overflow-hidden shadow-md flex flex-col" id="card-${p.id}">
 <!-- Imagem do produto -->
@@ -180,23 +180,23 @@ function renderizarProdutos() {
   <div>
     <p class="text-gray-400 text-xs">Preço por cento (100 un.)</p>
     <p class="text-brand-red font-black text-2xl">${precoCentoFmt}<span class="text-sm font-normal text-gray-400"> /cento</span></p>
-    <p class="text-gray-400 text-xs mt-0.5">25 un. = <strong class="text-gray-600">${precoMinFmt}</strong></p>
+    <p class="text-gray-400 text-xs mt-0.5">50 un. = <strong class="text-gray-600">${precoMinFmt}</strong></p>
   </div>
 </div>
 
-<!-- CONTROLE DE QUANTIDADE (mínimo = 25) -->
+<!-- CONTROLE DE QUANTIDADE (mínimo = 50) -->
 <div class="mt-4">
-  <label class="text-xs text-gray-500 font-semibold mb-1 block">Quantidade <span class="text-brand-red">(mín. 25)</span></label>
+  <label class="text-xs text-gray-500 font-semibold mb-1 block">Quantidade <span class="text-brand-red">(mín. 50)</span></label>
   <div class="flex items-center gap-2">
     <!-- Botão "–": usa alterarQty que respeita MIN_QTY -->
-    <button onclick="alterarQty('${p.id}', -25)" aria-label="Diminuir"
+    <button onclick="alterarQty('${p.id}', -50)" aria-label="Diminuir"
       class="w-9 h-9 rounded-full bg-gray-100 hover:bg-red-100 text-brand-red font-bold text-lg flex items-center justify-center transition border border-gray-200">−</button>
 
-    <input id="qty-${p.id}" type="number" value="${MIN_QTY}" min="${MIN_QTY}" step="25"
+    <input id="qty-${p.id}" type="number" value="${MIN_QTY}" min="${MIN_QTY}" step="50"
       class="w-16 text-center border border-gray-200 rounded-lg py-1.5 font-bold text-brand-dark text-sm focus:outline-none focus:ring-2 focus:ring-brand-red transition"
       aria-label="Quantidade de ${p.nome}" />
 
-    <button onclick="alterarQty('${p.id}', 25)" aria-label="Aumentar"
+    <button onclick="alterarQty('${p.id}', 50)" aria-label="Aumentar"
       class="w-9 h-9 rounded-full bg-gray-100 hover:bg-green-100 text-green-700 font-bold text-lg flex items-center justify-center transition border border-gray-200">+</button>
   </div>
 </div>
