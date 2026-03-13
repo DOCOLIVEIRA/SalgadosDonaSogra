@@ -133,6 +133,24 @@
                         <option value="Congelados">❄️ Congelados (frite em casa)</option>
                     </select>
                 </div>
+
+                <!-- 3. Data do Pedido -->
+                <div>
+                    <label for="data_pedido" class="block text-sm font-bold text-brand-dark mb-1">
+                        📅 Data da Entrega/Retirada <span class="text-brand-red">*</span>
+                    </label>
+                    <input type="date" id="data_pedido"
+                        class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition font-semibold bg-white" />
+                </div>
+
+                <!-- 4. Hora do Pedido -->
+                <div>
+                    <label for="hora_pedido" class="block text-sm font-bold text-brand-dark mb-1">
+                        ⏰ Horário <span class="text-brand-red">*</span>
+                    </label>
+                    <input type="time" id="hora_pedido"
+                        class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition font-semibold bg-white" />
+                </div>
             </div>
 
             <!-- Mensagem de observação -->
@@ -183,6 +201,11 @@
                             <span>🔥</span>
                             <span class="text-gray-500">Estado:</span>
                             <span id="sum-estado" class="font-bold text-brand-dark ml-auto"></span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 hidden" id="sum-data-hora-container">
+                            <span>📅</span>
+                            <span class="text-gray-500">Para:</span>
+                            <span id="sum-data-hora" class="font-bold text-brand-dark ml-auto"></span>
                         </div>
                     </div>
 

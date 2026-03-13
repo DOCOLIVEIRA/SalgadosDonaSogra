@@ -3,15 +3,15 @@
    preco = valor por UNIDADE (R$80,00 / 100 = R$0,80)
 ───────────────────────────────────────────────────────── */
 const PRODUTOS = [
-    { id: 'coxinha de frango', nome: 'Coxinha de Frango', desc: 'Massa crocante, recheio de frango desfiado temperado.', preco: 0.85, img: 'img/coxinha.png' },
-    { id: 'coxinha de carne', nome: 'Coxinha de Carne', desc: 'Coxinha frita com recheio de carne moída temperada.', preco: 0.85, img: 'img/coxinha_de_carne.png' },
+    { id: 'coxinha de frango', nome: 'Coxinha de Frango', desc: 'Massa de batata crocante, com recheio de frango e catupiry.', preco: 0.85, img: 'img/coxinha.png' },
+    { id: 'bolinha de queijo', nome: 'Bolinha de Queijo', desc: 'Massa de batata crocante, com recheio de queijo.', preco: 0.85, img: 'img/bolinha_queijo.jpg' },
     { id: 'kibe', nome: 'Kibe', desc: 'Kibe tradicional, crocante por fora e suculento por dentro.', preco: 0.85, img: 'img/kibe.png' },
+    { id: 'trouxinha de calabresa e queijo', nome: 'Trouxinha de Calabresa e Queijo', desc: 'Massa de batata crocante, com recheio de calabresa, queijo e catupiry.', preco: 0.85, img: 'img/almofadinha_calabresa_e_queijo.jpg' },
+    { id: 'enrroladinho de salsicha', nome: 'Enrroladinho de Salsicha', desc: 'Massa de batata crocante, com recheio de salsicha.', preco: 0.85, img: 'img/croquete_de_salsicha.png' },
+    { id: 'coxinha de carne', nome: 'Coxinha de Carne', desc: 'Massa de mandioca crocante, com recheio de carne moída com catupiry.', preco: 0.85, img: 'img/coxinha_de_carne.png' },
     { id: 'kibe com queijo', nome: 'Kibolinha', desc: 'Kibe com queijo, crocante por fora com queijo derretido por dentro.', preco: 0.85, img: 'img/kibolinha.png' },
-    { id: 'fataya', nome: 'Fataya', desc: 'Massa com recheio cremoso de carne moída temperada.', preco: 1.00, img: 'img/fataya.jpeg' },
-    { id: 'croquete de salsicha', nome: 'Croquete de Salsicha', desc: 'Crocante por fora com recheio cremoso de salsicha por dentro.', preco: 0.85, img: 'img/croquete_de_salsicha.png' },
-    { id: 'bolinha de queijo', nome: 'Bolinha de Queijo', desc: 'Bolinhas crocantes com mozzarella derretida por dentro.', preco: 0.85, img: 'img/bolinha_queijo.jpg' },
-    { id: 'bolinho de bacalhau', nome: 'Bolinho de Bacalhau', desc: 'Crocante por fora com recheio cremoso de bacalhau por dentro.', preco: 0.85, img: 'img/bolinho_de_bacalhau.jpg' },
-    { id: 'almofadinha de calabresa e queijo', nome: 'Almofadinha de Calabresa e Queijo', desc: 'Crocante por fora com recheio cremoso de calabresa e queijo por dentro.', preco: 0.85, img: 'img/almofadinha_calabresa_e_queijo.jpg' },
+    { id: 'bolinho de bacalhau', nome: 'Bolinho de Bacalhau', desc: 'Massa de batata e bacalhau, crocante por fora e suculento por dentro.', preco: 0.85, img: 'img/bolinho_de_bacalhau.jpg' },
+    { id: 'fataya', nome: 'Fataya', desc: 'Massa fininha, com recheio de carne moída e temperos sírios.', preco: 1.00, img: 'img/fataya.jpeg' },
 ];
 
 /* ─────────────────────────────────────────────────────────
@@ -382,16 +382,32 @@ function renderizarCarrinho() {
 function atualizarResumoSelects() {
     const pagEl = document.getElementById('pagamento');
     const estEl = document.getElementById('estado');
+    const dataEl = document.getElementById('data_pedido');
+    const horaEl = document.getElementById('hora_pedido');
+
     if (!pagEl || !estEl) return;
 
     const div = document.getElementById('summary-selects');
     const sumP = document.getElementById('sum-pagamento');
     const sumE = document.getElementById('sum-estado');
+    const dhContainer = document.getElementById('sum-data-hora-container');
+    const sumDH = document.getElementById('sum-data-hora');
 
-    if (pagEl.value || estEl.value) {
+    if (pagEl.value || estEl.value || (dataEl && dataEl.value) || (horaEl && horaEl.value)) {
         div.classList.remove('hidden');
         sumP.textContent = pagEl.value || '—';
         sumE.textContent = estEl.value || '—';
+
+        if (dataEl && dataEl.value && horaEl && horaEl.value) {
+            // Formatar data YYYY-MM-DD para DD/MM/YYYY
+            const partesData = dataEl.value.split('-');
+            const dataFormatada = partesData.length === 3 ? `${partesData[2]}/${partesData[1]}/${partesData[0]}` : dataEl.value;
+            sumDH.textContent = `${dataFormatada} às ${horaEl.value}`;
+            dhContainer.classList.remove('hidden');
+        } else {
+            dhContainer.classList.add('hidden');
+        }
+
     } else {
         div.classList.add('hidden');
     }
@@ -404,6 +420,8 @@ function atualizarResumoSelects() {
 function enviarWhatsApp() {
     const pagamento = document.getElementById('pagamento').value;
     const estado = document.getElementById('estado').value;
+    const dataPedido = document.getElementById('data_pedido').value;
+    const horaPedido = document.getElementById('hora_pedido').value;
     const obs = document.getElementById('obs').value.trim();
 
     if (carrinho.length === 0) {
@@ -422,6 +440,21 @@ function enviarWhatsApp() {
         alert('⚠️ Por favor, selecione o estado do salgado (Fritos ou Congelados).');
         return;
     }
+    if (!dataPedido) {
+        document.getElementById('data_pedido').focus();
+        document.getElementById('data_pedido').classList.add('border-red-500');
+        alert('⚠️ Por favor, informe a data de entrega ou retirada.');
+        return;
+    }
+    if (!horaPedido) {
+        document.getElementById('hora_pedido').focus();
+        document.getElementById('hora_pedido').classList.add('border-red-500');
+        alert('⚠️ Por favor, informe o horário do pedido.');
+        return;
+    }
+
+    const partesData = dataPedido.split('-');
+    const dataFormatada = partesData.length === 3 ? `${partesData[2]}/${partesData[1]}/${partesData[0]}` : dataPedido;
 
     const total = calcularTotais();
     const qtyTotal = carrinho.reduce((s, i) => s + i.qty, 0);
@@ -440,6 +473,7 @@ function enviarWhatsApp() {
     msg += ` *Valor total:* ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n`;
     msg += ` *Pagamento:* ${pagamento}\n`;
     msg += ` *Estado:* ${estado}\n`;
+    msg += ` *Para quando:* ${dataFormatada} às ${horaPedido}\n`;
 
     if (obs) {
         msg += `📝 *Obs:* ${obs}\n`;
@@ -472,6 +506,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const estadoEl = document.getElementById('estado');
         if (estadoEl) estadoEl.addEventListener('change', atualizarResumoSelects);
+
+        const dataEl = document.getElementById('data_pedido');
+        if (dataEl) dataEl.addEventListener('change', atualizarResumoSelects);
+
+        const horaEl = document.getElementById('hora_pedido');
+        if (horaEl) horaEl.addEventListener('change', atualizarResumoSelects);
     }
 
     // Atualiza badges em qualquer tela (só requer a div badge)
