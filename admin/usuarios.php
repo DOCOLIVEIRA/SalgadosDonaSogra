@@ -45,6 +45,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // -- Alterar Senha --
+    if ($acao === 'senha') {
+        $user_id = $_POST['user_id'] ?? null;
+        $nova_senha = $_POST['nova_senha'] ?? '';
+        if ($user_id && strlen($nova_senha) >= 4) {
+            $hash = password_hash($nova_senha, PASSWORD_DEFAULT);
+            $stmt = $pdo->prepare("UPDATE usuarios SET senha_hash = ? WHERE id = ?");
+            $stmt->execute([$hash, $user_id]);
+            $_SESSION['flash'] = "Senha atualizada com sucesso!";
+        } else {
+            $_SESSION['flash'] = "Erro: A senha precisa ter pelo menos 4 caracteres.";
+        }
+    }
+
     header("Location: usuarios.php");
     exit();
 }
@@ -70,7 +84,8 @@ render_admin_header('Usuários', '👥 Gestão de Acessos');
                         <th>Perfil</th>
                         <th>Criado em</th>
                         <th>Status</th>
-                        <th>Ações</th>
+                        <th>Ativar/Desativar</th>
+                        <th>Alterar Senha </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -98,18 +113,29 @@ render_admin_header('Usuários', '👥 Gestão de Acessos');
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <?php if ($u['id'] != $_SESSION['user_id']): ?>
-                                    <form method="POST" action="usuarios.php">
-                                        <input type="hidden" name="acao" value="toggle">
-                                        <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
-                                        <button type="submit" class="btn <?= $u['ativo'] ? 'btn-danger' : 'btn-success' ?>"
-                                            style="padding:0.3rem 0.6rem; font-size:0.75rem;">
-                                            <?= $u['ativo'] ? '🚫 Desativar' : '✅ Reativar' ?>
-                                        </button>
-                                    </form>
-                                <?php else: ?>
-                                    <span style="color:#555; font-size:0.75rem;">Sua conta</span>
-                                <?php endif; ?>
+                                <div style="display:flex; gap:0.4rem;">
+                                    <?php if ($u['id'] != $_SESSION['user_id']): ?>
+                                        <form method="POST" action="usuarios.php" style="margin:0;">
+                                            <input type="hidden" name="acao" value="toggle">
+                                            <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
+                                            <button type="submit" class="btn <?= $u['ativo'] ? 'btn-danger' : 'btn-success' ?>"
+                                                style="padding:0.3rem 0.6rem; font-size:0.75rem;">
+                                                <?= $u['ativo'] ? '🚫 Desativar' : '✅ Reativar' ?>
+                                            </button>
+                                        </form>
+                                    <?php else: ?>
+                                        <span style="color:#555; font-size:0.75rem;">Sua conta</span>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display:flex; gap:0.4rem;">
+                                    <button type="button" class="btn btn-warning"
+                                        style="padding:0.3rem 0.6rem; font-size:0.75rem;"
+                                        onclick="abrirModalSenha(<?= $u['id'] ?>, '<?= htmlspecialchars($u['usuario']) ?>')">
+                                        🔑 Senha
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -126,21 +152,28 @@ render_admin_header('Usuários', '👥 Gestão de Acessos');
         <div style="padding:1.5rem;">
             <form method="POST" action="usuarios.php">
                 <input type="hidden" name="acao" value="criar">
-                <div class="form-group">
-                    <label class="form-label">Nome de Usuário</label>
-                    <input type="text" name="username" class="form-input" required autocomplete="off">
+
+                <div class="form-row">
+                    <div class="form-group form-col">
+                        <label class="form-label">Nome de Usuário</label>
+                        <input type="text" name="username" class="form-input" required autocomplete="off"
+                            style="width:100%;">
+                    </div>
+                    <div class="form-group form-col">
+                        <label class="form-label">Senha</label>
+                        <input type="password" name="password" class="form-input" required autocomplete="new-password"
+                            style="width:100%;">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Senha</label>
-                    <input type="password" name="password" class="form-input" required autocomplete="new-password">
-                </div>
+
                 <div class="form-group" style="margin-bottom:1.5rem;">
                     <label class="form-label">Nível de Acesso</label>
-                    <select name="role" class="form-input">
+                    <select name="role" class="form-input" style="width:100%;">
                         <option value="staff">Staff (Atendente)</option>
                         <option value="admin">Administrador Geral</option>
                     </select>
                 </div>
+
                 <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">➕ Cadastrar
                     Usuário</button>
             </form>
@@ -148,5 +181,41 @@ render_admin_header('Usuários', '👥 Gestão de Acessos');
     </div>
 
 </div>
+
+<!-- Modal Alterar Senha Nativo -->
+<dialog id="modal-senha"
+    style="margin: auto; border:none; border-radius:12px; background:#1a1a1a; padding:0; color:#fff; width:90%; max-width:400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <div
+        style="padding: 1.5rem; border-bottom: 1px solid #2a2a2a; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="font-size:1.1rem; font-weight:700;">Alterar Senha</h3>
+        <button type="button" onclick="document.getElementById('modal-senha').close()"
+            style="background:none; border:none; color:#888; font-size:1.2rem; cursor:pointer;">&times;</button>
+    </div>
+    <div style="padding: 1.5rem;">
+        <p style="margin-bottom: 1rem; color:#aaa; font-size:0.9rem;">Defina a nova senha para <strong
+                id="modal-nome-usuario" style="color:#C0392B;"></strong>.</p>
+        <form method="POST" action="usuarios.php">
+            <input type="hidden" name="acao" value="senha">
+            <input type="hidden" id="modal-user-id" name="user_id" value="">
+            <div class="form-group">
+                <label>Nova Senha</label>
+                <input type="password" name="nova_senha" class="form-input" style="width:100%;" required minlength="4">
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.5rem;">
+                <button type="button" class="btn btn-ghost"
+                    onclick="document.getElementById('modal-senha').close()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Salvar Senha</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<script>
+    function abrirModalSenha(id, nome) {
+        document.getElementById('modal-user-id').value = id;
+        document.getElementById('modal-nome-usuario').innerText = nome;
+        document.getElementById('modal-senha').showModal();
+    }
+</script>
 
 <?php render_admin_footer(); ?>

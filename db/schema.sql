@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
 -- Inserindo um usuário de teste (admin / admin)
 -- A senha 'admin' foi hasheada com BCRYPT padrão do PHP password_hash()
 INSERT IGNORE INTO usuarios (usuario, senha_hash, nivel_acesso) 
-VALUES ('admin', '$2y$10$wE9s0g/8Qo.S6oT.ZgS6V.I3T.V9Hw.9wV6rV7fQ7l4V.V.V.V.V.', 'admin');
+VALUES ('admin', '$2y$10$WFde93BoydYicFLgt2oTmejKLPe1zsSStAICR1ToiOy7EzpjfBPBy', 'admin');
 
 
 -- ----------------------------------------------------------------------------
@@ -46,11 +46,11 @@ INSERT IGNORE INTO produtos (slug, nome, descricao, preco_unitario, estoque_atua
 ('coxinha-de-carne', 'Coxinha de Carne', 'Coxinha frita com recheio de carne moída temperada.', 0.85, 500, 'img/coxinha_de_carne.png'),
 ('kibe', 'Kibe', 'Kibe tradicional, crocante por fora e suculento por dentro.', 0.70, 500, 'img/kibe.png'),
 ('kibe-com-queijo', 'Kibolinha', 'Kibe com queijo, crocante por fora com queijo derretido por dentro.', 0.85, 500, 'img/kibolinha.png'),
-('fataya', 'Fataya', 'Massa com recheio cremoso de carne moída temperada.', 1.10, 500, 'img/fataya.png'),
+('fataya', 'Fataya', 'Massa com recheio cremoso de carne moída temperada.', 1.10, 500, 'img/fataya.jpeg'),
 ('croquete-de-salsicha', 'Croquete de Salsicha', 'Crocante por fora com recheio cremoso de salsicha por dentro.', 0.70, 500, 'img/croquete_de_salsicha.png'),
-('bolinha-de-queijo', 'Bolinha de Queijo', 'Bolinhas crocantes com mozzarella derretida por dentro.', 0.80, 500, 'img/bolinha_queijo.png'),
-('bolinho-de-bacalhau', 'Bolinho de Bacalhau', 'Crocante por fora com recheio cremoso de bacalhau por dentro.', 1.00, 500, 'img/bolinho_de_bacalhau.png'),
-('almofadinha-calabresa-queijo', 'Almofadinha de Calabresa e Queijo', 'Crocante por fora com recheio cremoso de calabresa e queijo por dentro.', 0.80, 500, 'img/almofadinha_calabresa_e_queijo.png');
+('bolinha-de-queijo', 'Bolinha de Queijo', 'Bolinhas crocantes com mozzarella derretida por dentro.', 0.80, 500, 'img/bolinha_queijo.jpg'),
+('bolinho-de-bacalhau', 'Bolinho de Bacalhau', 'Crocante por fora com recheio cremoso de bacalhau por dentro.', 1.00, 500, 'img/bolinho_de_bacalhau.jpg'),
+('almofadinha-calabresa-queijo', 'Almofadinha de Calabresa e Queijo', 'Crocante por fora com recheio cremoso de calabresa e queijo por dentro.', 0.80, 500, 'img/almofadinha_calabresa_e_queijo.jpg');
 
 
 -- ----------------------------------------------------------------------------

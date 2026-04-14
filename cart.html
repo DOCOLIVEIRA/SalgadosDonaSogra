@@ -104,8 +104,41 @@
                 </div>
             </div>
 
+            <!-- ── DADOS DO CLIENTE ── -->
+            <div class="mt-8 mb-6" id="customer-info-section">
+                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-3">Seus Dados</h3>
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="cliente_nome" class="block text-sm font-bold text-brand-dark mb-1">
+                            Nome Completo <span class="text-brand-red">*</span>
+                        </label>
+                        <input type="text" id="cliente_nome" placeholder="Seu nome"
+                            class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition font-semibold bg-white" />
+                    </div>
+                    <div>
+                        <label for="cliente_telefone" class="block text-sm font-bold text-brand-dark mb-1">
+                            Telefone (WhatsApp) <span class="text-brand-red">*</span>
+                        </label>
+                        <input type="tel" id="cliente_telefone" placeholder="(  )       -    "
+                            class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition font-semibold bg-white" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- AVISO RETIRADA NO LOCAL -->
+            <div
+                class="mt-2 mb-6 bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-xl flex gap-3 text-sm">
+                <span class="text-lg">📍</span>
+                <div>
+                    <h4 class="font-bold mb-0.5">Apenas Retirada no Local</h4>
+                    <p class="text-yellow-700/80 leading-snug">Não fazemos entregas por enquanto. Todos os pedidos devem
+                        ser retirados em nosso endereço (Pirajuí-SP).</br> Rachid Cury nº404 - Centro</p>
+                </div>
+            </div>
+
             <!-- ── SELECTS OBRIGATÓRIOS ── -->
-            <div class="mt-8 grid sm:grid-cols-2 gap-4" id="selects-section">
+            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-3">Opções do Pedido</h3>
+            <div class="grid sm:grid-cols-2 gap-4" id="selects-section">
 
                 <!-- 1. Forma de Pagamento -->
                 <div>
@@ -137,7 +170,7 @@
                 <!-- 3. Data do Pedido -->
                 <div>
                     <label for="data_pedido" class="block text-sm font-bold text-brand-dark mb-1">
-                        📅 Data da Entrega/Retirada <span class="text-brand-red">*</span>
+                        📅 Data da Retirada <span class="text-brand-red">*</span>
                     </label>
                     <input type="date" id="data_pedido"
                         class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition font-semibold bg-white" />
@@ -158,6 +191,18 @@
                 <label for="obs" class="block text-sm font-bold text-brand-dark mb-1">📝 Observações (opcional)</label>
                 <textarea id="obs" rows="2" placeholder="Ex: sem gergelim, ponto extra de fritura..."
                     class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition resize-none bg-white"></textarea>
+            </div>
+
+            <!-- ALERTA DE EVENTO (INVISÍVEL POR PADRÃO) -->
+            <div id="alerta-evento"
+                class="hidden mt-6 bg-brand-gold/10 border border-brand-gold/30 rounded-xl p-4 flex gap-3 text-sm">
+                <span class="text-xl">🎉</span>
+                <div>
+                    <h4 class="font-bold text-brand-dark mb-1">Pedido para Festa/Evento</h4>
+                    <p class="text-gray-600 leading-snug">Se você desejar que os salgados sejam fritos diretamente no
+                        local da festa, <strong>existe um valor adicional a combinar</strong>. Nossa equipe entrará em
+                        contato confirmando esse valor após o envio.</p>
+                </div>
             </div>
         </div><!-- /esquerda -->
 
@@ -180,10 +225,6 @@
                             <span>Subtotal</span>
                             <span id="subtotal-val" class="font-semibold">R$ 0,00</span>
                         </div>
-                        <div class="flex justify-between text-sm text-gray-500">
-                            <span>Entrega</span>
-                            <span class="text-green-600 font-semibold" id="frete-val">A combinar</span>
-                        </div>
                         <div class="flex justify-between items-center mt-3">
                             <span class="font-black text-xl text-brand-dark">Total</span>
                             <span id="total-val" class="font-black text-2xl text-brand-red">R$ 0,00</span>
@@ -202,7 +243,8 @@
                             <span class="text-gray-500">Estado:</span>
                             <span id="sum-estado" class="font-bold text-brand-dark ml-auto"></span>
                         </div>
-                        <div class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 hidden" id="sum-data-hora-container">
+                        <div class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 hidden"
+                            id="sum-data-hora-container">
                             <span>📅</span>
                             <span class="text-gray-500">Para:</span>
                             <span id="sum-data-hora" class="font-bold text-brand-dark ml-auto"></span>

@@ -8,7 +8,7 @@
     justify-content: center;
 }
 
-.modal-overlay.open {
+.modal-overlay.active {
     display: flex;
 }
 

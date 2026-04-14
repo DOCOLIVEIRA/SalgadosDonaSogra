@@ -56,6 +56,9 @@ function render_admin_header($title = 'Painel', $page_title = 'Painel')
 
                 <?php if (is_admin()): ?>
                     <span class="nav-section-label">Configurações</span>
+                    <a href="/admin/configuracoes.php" class="nav-link <?= $current_page == 'configuracoes.php' ? 'active' : '' ?>">
+                        <span class="nav-icon">⚙️</span> Configurações Gerais
+                    </a>
                     <a href="/admin/usuarios.php" class="nav-link <?= $current_page == 'usuarios.php' ? 'active' : '' ?>">
                         <span class="nav-icon">👥</span> Usuários
                     </a>

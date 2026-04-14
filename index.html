@@ -71,7 +71,8 @@
 
             <!-- Nav Links -->
             <nav class="flex items-center gap-4 sm:gap-6 text-white text-sm font-semibold">
-                <a href="#produtos" class="hidden sm:inline hover:text-brand-gold transition-colors">Cardápio</a>
+                <a href="#produtos" onclick="iniciarModoNormal()" class="hidden sm:inline hover:text-brand-gold transition-colors">Cardápio</a>
+                <a href="javascript:void(0)" onclick="iniciarModoEvento()" class="hidden sm:inline text-brand-gold hover:text-white transition-colors">🎊 Orçar Festa</a>
                 <a href="#sobre" class="hidden sm:inline hover:text-brand-gold transition-colors">Sobre nós</a>
                 <a href="#contato" class="hidden sm:inline hover:text-brand-gold transition-colors">Contato</a>
                 <!-- Botão carrinho -->
@@ -107,7 +108,7 @@
                     <h2 class="font-black text-3xl sm:text-5xl mt-2 drop-shadow">Os melhores salgados de Pirajuí!</h2>
                     <p class="mt-2 text-white/90 text-sm sm:text-base">Artesanais, crocantes, irresistíveis. Peça já!
                     </p>
-                    <a href="#produtos"
+                    <a href="#produtos" onclick="iniciarModoNormal()"
                         class="mt-5 inline-block bg-brand-gold text-brand-red font-black px-8 py-3 rounded-full text-sm hover:bg-yellow-300 transition shadow-lg">Ver
                         Cardápio</a>
                 </div>
@@ -121,7 +122,7 @@
                     <h2 class="font-black text-3xl sm:text-5xl mt-2 drop-shadow">Congelados prontos para fritar!</h2>
                     <p class="mt-2 text-white/90 text-sm sm:text-base">Estoque seu freezer e frite na hora. Qualidade
                         garantida!</p>
-                    <a href="#produtos"
+                    <a href="#produtos" onclick="iniciarModoNormal()"
                         class="mt-5 inline-block bg-white text-orange-600 font-black px-8 py-3 rounded-full text-sm hover:bg-orange-50 transition shadow-lg">Pedir
                         Agora</a>
                 </div>
@@ -133,11 +134,9 @@
                 <div class="text-center">
                     <p class="text-brand-gold font-black text-4xl sm:text-6xl leading-none drop-shadow-lg">🎉</p>
                     <h2 class="font-black text-3xl sm:text-5xl mt-2 drop-shadow">Festas & Eventos!</h2>
-                    <p class="mt-2 text-white/90 text-sm sm:text-base">Monte seu kit com 100+ unidades e ganhe frete
-                        grátis em Pirajuí.</p>
-                    <a href="#contato"
-                        class="mt-5 inline-block bg-brand-gold text-brand-red font-black px-8 py-3 rounded-full text-sm hover:bg-yellow-300 transition shadow-lg">Fale
-                        Conosco</a>
+                    <p class="mt-2 text-white/90 text-sm sm:text-base">Apenas retirada no local. Garanta o melhor para sua festa e convidados!</p>
+                    <a href="javascript:void(0)" onclick="iniciarModoEvento()"
+                        class="mt-5 inline-block bg-brand-gold text-brand-red font-black px-8 py-3 rounded-full text-sm hover:bg-yellow-300 transition shadow-lg">Começar Orçamento</a>
                 </div>
             </div>
 
@@ -150,7 +149,7 @@
                     <h2 class="font-black text-3xl sm:text-5xl mt-2 drop-shadow">Ideal para momentos em Família!</h2>
                     <p class="mt-2 text-white/90 text-sm sm:text-base">Salgadinhos fritos na hora, quentinhos e
                         deliciosos.</p>
-                    <a href="#contato"
+                    <a href="#produtos" onclick="iniciarModoNormal()"
                         class="mt-5 inline-block bg-brand-gold text-brand-red font-black px-8 py-3 rounded-full text-sm hover:bg-yellow-300 transition shadow-lg">Fale
                         Conosco</a>
                 </div>
@@ -235,7 +234,7 @@
             <div>
                 <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-sm">Navegação</h4>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="#produtos" class="hover:text-brand-gold transition-colors">🍽 Cardápio</a></li>
+                    <li><a href="#produtos" onclick="iniciarModoNormal()" class="hover:text-brand-gold transition-colors">🍽 Cardápio</a></li>
                     <li><a href="#sobre" class="hover:text-brand-gold transition-colors">🏠 Sobre nós</a></li>
                     <li><a href="cart.html" class="hover:text-brand-gold transition-colors">🛒 Meu Carrinho</a></li>
                 </ul>

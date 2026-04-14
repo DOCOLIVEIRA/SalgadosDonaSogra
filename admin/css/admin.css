@@ -377,3 +377,29 @@ tbody tr:hover {
     outline: none;
     border-color: #C0392B;
 }
+
+/* Utilitários de Grid para Formulários (Estilo Bootstrap) */
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-col {
+    flex: 1;
+    min-width: 200px;
+    margin-bottom: 0;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #ccc;
+    font-size: 0.85rem;
+    font-weight: 600;
+}

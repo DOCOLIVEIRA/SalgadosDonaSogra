@@ -1,24 +1,33 @@
 /* ─────────────────────────────────────────────────────────
    DADOS DOS PRODUTOS
-   preco = valor por UNIDADE (R$80,00 / 100 = R$0,80)
 ───────────────────────────────────────────────────────── */
-const PRODUTOS = [
-    { id: 'coxinha de frango', nome: 'Coxinha de Frango', desc: 'Massa de batata crocante, com recheio de frango e catupiry.', preco: 0.85, img: 'img/coxinha.png' },
-    { id: 'bolinha de queijo', nome: 'Bolinha de Queijo', desc: 'Massa de batata crocante, com recheio de queijo.', preco: 0.85, img: 'img/bolinha_queijo.jpg' },
-    { id: 'kibe', nome: 'Kibe', desc: 'Kibe tradicional, crocante por fora e suculento por dentro.', preco: 0.85, img: 'img/kibe.png' },
-    { id: 'trouxinha de calabresa e queijo', nome: 'Trouxinha de Calabresa e Queijo', desc: 'Massa de batata crocante, com recheio de calabresa, queijo e catupiry.', preco: 0.85, img: 'img/almofadinha_calabresa_e_queijo.jpg' },
-    { id: 'enrroladinho de salsicha', nome: 'Enrroladinho de Salsicha', desc: 'Massa de batata crocante, com recheio de salsicha.', preco: 0.85, img: 'img/croquete_de_salsicha.png' },
-    { id: 'coxinha de carne', nome: 'Coxinha de Carne', desc: 'Massa de mandioca crocante, com recheio de carne moída com catupiry.', preco: 0.85, img: 'img/coxinha_de_carne.png' },
-    { id: 'kibe com queijo', nome: 'Kibolinha', desc: 'Kibe com queijo, crocante por fora com queijo derretido por dentro.', preco: 0.85, img: 'img/kibolinha.png' },
-    { id: 'bolinho de bacalhau', nome: 'Bolinho de Bacalhau', desc: 'Massa de batata e bacalhau, crocante por fora e suculento por dentro.', preco: 0.85, img: 'img/bolinho_de_bacalhau.jpg' },
-    { id: 'fataya', nome: 'Fataya', desc: 'Massa fininha, com recheio de carne moída e temperos sírios.', preco: 1.00, img: 'img/fataya.jpeg' },
-];
+let PRODUTOS = [];
 
 /* ─────────────────────────────────────────────────────────
-   CONSTANTES
+   CONSTANTES / CONFIGURAÇÕES DINÂMICAS
 ───────────────────────────────────────────────────────── */
-const MIN_QTY = 50;
+let MIN_QTY = 50;
+let STEP_QTY_INDEX = 50;
+let STEP_QTY_CART = 5;
 const WHATSAPP_NUMBER = '5514996748488'; // ← Altere aqui
+
+/* ─────────────────────────────────────────────────────────
+   MODO EVENTO E NORMAL
+───────────────────────────────────────────────────────── */
+let isEvento = false;
+
+function iniciarModoEvento() {
+    isEvento = true;
+    localStorage.setItem('ds_modo_evento', 'true');
+    mostrarToast('🎉 Modo Festa ativado! Ao clicar no carrinho você irá para o Orçamento.', 'ok');
+    setTimeout(() => { document.getElementById('produtos').scrollIntoView({ behavior: 'smooth' }); }, 300);
+}
+
+function iniciarModoNormal() {
+    isEvento = false;
+    localStorage.removeItem('ds_modo_evento');
+    mostrarToast('🛒 Modo Pedido Padrão ativado! O carrinho funcionará normalmente.', 'ok');
+}
 
 /* ─────────────────────────────────────────────────────────
    ESTADO DO CARRINHO – armazenado no localStorage
@@ -98,10 +107,17 @@ function mostrarToast(msg, tipo = 'ok') {
  */
 function irParaCarrinho() {
     if (carrinho.length === 0) {
-        mostrarToast('🛒 Seu carrinho está vazio!', 'warn');
+        mostrarToast('🛒 Sua lista está vazia!', 'warn');
         return;
     }
-    window.location.href = 'cart.html';
+    
+    // Roteador: Evento ou Carrinho Normal?
+    const hasEventoLocal = localStorage.getItem('ds_modo_evento') === 'true';
+    if (isEvento || hasEventoLocal) {
+        window.location.href = 'evento.html';
+    } else {
+        window.location.href = 'cart.html';
+    }
 }
 
 /* =========================================================
@@ -159,44 +175,48 @@ function renderizarProdutos() {
     const grid = document.getElementById('product-grid');
     if (!grid) return;
 
+    if (PRODUTOS.length === 0) {
+        grid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-10">Nenhum produto disponível no momento.</p>';
+        return;
+    }
+
     grid.innerHTML = PRODUTOS.map(p => {
         const precoCentoFmt = (p.preco * 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        const precoMinFmt = (p.preco * 50).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const precoMinFmt = (p.preco * MIN_QTY).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         return `
 <article class="product-card bg-white rounded-2xl overflow-hidden shadow-md flex flex-col" id="card-${p.id}">
 <!-- Imagem do produto -->
-<div class="relative overflow-hidden h-52 bg-gray-100">
-<img src="${p.img}" alt="${p.nome}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" />
+<div class="relative overflow-hidden h-52 bg-gray-100 flex items-center justify-center">
+<img src="${p.img}" alt="${p.nome}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" onerror="this.src='img/logo.png'" />
 <span class="absolute top-3 left-3 bg-brand-red text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">Artesanal</span>
 </div>
 
 <!-- Conteúdo do card -->
 <div class="p-5 flex flex-col flex-1">
 <h3 class="font-black text-lg text-brand-dark leading-tight">${p.nome}</h3>
-<p class="text-gray-500 text-sm mt-1 flex-1">${p.desc}</p>
+<p class="text-gray-500 text-sm mt-1 flex-1">${p.desc || ''}</p>
 
-<!-- Preços (modelo: R$80,00 por cento) -->
+<!-- Preços -->
 <div class="mt-4 flex items-end justify-between">
   <div>
     <p class="text-gray-400 text-xs">Preço por cento (100 un.)</p>
     <p class="text-brand-red font-black text-2xl">${precoCentoFmt}<span class="text-sm font-normal text-gray-400"> /cento</span></p>
-    <p class="text-gray-400 text-xs mt-0.5">50 un. = <strong class="text-gray-600">${precoMinFmt}</strong></p>
+    <p class="text-gray-400 text-xs mt-0.5">${MIN_QTY} un. = <strong class="text-gray-600">${precoMinFmt}</strong></p>
   </div>
 </div>
 
-<!-- CONTROLE DE QUANTIDADE (mínimo = 50) -->
+<!-- CONTROLE DE QUANTIDADE -->
 <div class="mt-4">
-  <label class="text-xs text-gray-500 font-semibold mb-1 block">Quantidade <span class="text-brand-red">(mín. 50)</span></label>
+  <label class="text-xs text-gray-500 font-semibold mb-1 block">Quantidade <span class="text-brand-red">(mín. ${MIN_QTY})</span></label>
   <div class="flex items-center gap-2">
-    <!-- Botão "–": usa alterarQty que respeita MIN_QTY -->
-    <button onclick="alterarQty('${p.id}', -50)" aria-label="Diminuir"
+    <button onclick="alterarQty('${p.id}', -${STEP_QTY_INDEX})" aria-label="Diminuir"
       class="w-9 h-9 rounded-full bg-gray-100 hover:bg-red-100 text-brand-red font-bold text-lg flex items-center justify-center transition border border-gray-200">−</button>
 
-    <input id="qty-${p.id}" type="number" value="${MIN_QTY}" min="${MIN_QTY}" step="50"
+    <input id="qty-${p.id}" type="number" value="${MIN_QTY}" min="${MIN_QTY}" step="${STEP_QTY_INDEX}"
       class="w-16 text-center border border-gray-200 rounded-lg py-1.5 font-bold text-brand-dark text-sm focus:outline-none focus:ring-2 focus:ring-brand-red transition"
       aria-label="Quantidade de ${p.nome}" />
 
-    <button onclick="alterarQty('${p.id}', 50)" aria-label="Aumentar"
+    <button onclick="alterarQty('${p.id}', ${STEP_QTY_INDEX})" aria-label="Aumentar"
       class="w-9 h-9 rounded-full bg-gray-100 hover:bg-green-100 text-green-700 font-bold text-lg flex items-center justify-center transition border border-gray-200">+</button>
   </div>
 </div>
@@ -317,10 +337,7 @@ function renderizarCarrinho() {
     const total = calcularTotais();
     const qtyTotal = carrinho.reduce((s, i) => s + i.qty, 0);
 
-    // Frete grátis acima de 100 unidades
-    const freteGratis = qtyTotal >= 100;
-    freteEl.textContent = freteGratis ? 'GRÁTIS 🎉' : 'A combinar';
-    freteEl.className = freteGratis ? 'text-green-600 font-black' : 'text-gray-500 font-semibold';
+    // Frete foi removido. Apenas retirada no local.
 
     // ── Linhas da tabela ──
     list.innerHTML = carrinho.map(item => {
@@ -345,12 +362,12 @@ function renderizarCarrinho() {
 
 <!-- Quantidade – com trava MIN_QTY -->
 <div class="hidden sm:flex items-center gap-1 justify-center">
-<button onclick="alterarQtyCarrinho('${item.id}', ${item.qty - 5})"
+<button onclick="alterarQtyCarrinho('${item.id}', ${item.qty - STEP_QTY_CART})"
   class="w-7 h-7 rounded-full bg-gray-100 hover:bg-red-100 text-brand-red font-bold text-sm flex items-center justify-center border border-gray-200 transition">−</button>
-<input type="number" value="${item.qty}" min="${MIN_QTY}" step="5"
+<input type="number" value="${item.qty}" min="${MIN_QTY}" step="${STEP_QTY_CART}"
   onchange="alterarQtyCarrinho('${item.id}', this.value)"
   class="w-14 text-center border border-gray-200 rounded-lg py-1 font-bold text-sm focus:outline-none focus:ring-1 focus:ring-brand-red" />
-<button onclick="alterarQtyCarrinho('${item.id}', ${item.qty + 5})"
+<button onclick="alterarQtyCarrinho('${item.id}', ${item.qty + STEP_QTY_CART})"
   class="w-7 h-7 rounded-full bg-gray-100 hover:bg-green-100 text-green-700 font-bold text-sm flex items-center justify-center border border-gray-200 transition">+</button>
 </div>
 
@@ -459,8 +476,149 @@ function enviarWhatsApp() {
     const total = calcularTotais();
     const qtyTotal = carrinho.reduce((s, i) => s + i.qty, 0);
 
-    let msg = '*PEDIDO – Salgados Dona Sogra*\n';
+    const clienteNomeInfo = document.getElementById('cliente_nome');
+    const clienteNome = clienteNomeInfo ? clienteNomeInfo.value.trim() : '';
+    const clienteTelefoneInfo = document.getElementById('cliente_telefone');
+    const clienteTelefone = clienteTelefoneInfo ? clienteTelefoneInfo.value.trim() : '';
+
+    if (!clienteNome) {
+        clienteNomeInfo.focus();
+        clienteNomeInfo.classList.add('border-red-500');
+        alert('⚠️ Por favor, informe seu nome completo.');
+        return;
+    }
+
+    if (!clienteTelefone) {
+        clienteTelefoneInfo.focus();
+        clienteTelefoneInfo.classList.add('border-red-500');
+        alert('⚠️ Por favor, informe seu WhatsApp.');
+        return;
+    }
+
+    const btn = document.getElementById('btn-whatsapp');
+    const bkpHTML = btn.innerHTML;
+    btn.innerHTML = 'Processando...';
+    btn.disabled = true;
+
+    // Enviar para o banco primeiro
+    fetch('api/salvar_pedido.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            nome: clienteNome,
+            telefone: clienteTelefone,
+            valor_total: total,
+            itens: carrinho
+        })
+    }).then(r => r.json()).then(resp => {
+        if (!resp.sucesso) {
+            alert('Erro ao registrar pedido no sistema: ' + (resp.erro || 'Desconhecido'));
+        }
+        
+        // Continua montando a mensagem para o whatsapp
+        let msg = isEvento ? '*🚀 ORÇAMENTO FESTA / EVENTO*\n' : '*PEDIDO – Salgados Dona Sogra*\n';
+        msg += `👩‍🦱 *Cliente:* ${clienteNome} - Cel: ${clienteTelefone}\n`;
+        msg += '─────────────────────\n';
+
+        carrinho.forEach(item => {
+            const sub = (item.preco * item.qty).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            msg += `• *${item.nome}*\n`;
+            msg += `  ${item.qty} un. × ${item.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} = ${sub}\n`;
+        });
+
+        msg += '─────────────────────\n';
+        msg += ` *Total de unidades:* ${qtyTotal}\n`;
+        msg += ` *Valor total:* ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n`;
+        msg += ` *Pagamento:* ${pagamento}\n`;
+        msg += ` *Estado:* ${estado}\n`;
+        msg += ` *Para quando:* ${dataFormatada} às ${horaPedido}\n`;
+
+        if (isEvento) {
+            msg += ` *⚠️ Solicitou fritar no local. Aguardando combinação de valores.*\n`;
+        }
+
+        if (obs) {
+            msg += `📝 *Obs:* ${obs}\n`;
+        }
+
+        msg += '─────────────────────\n';
+        msg += '_Agradecemos a preferência!_ 🍽';
+
+        const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+        
+        // Esvazia carrinho se houver sucesso garantido
+        carrinho = [];
+        salvarCarrinho();
+        
+        window.location.href = url;
+    }).catch(err => {
+        alert('Erro de comunicação. Tente novamente.');
+        btn.innerHTML = bkpHTML;
+        btn.disabled = false;
+    });
+}
+
+function enviarOrcamentoWhatsApp() {
+    if (carrinho.length === 0) {
+        alert('⚠️ Sua lista está vazia!');
+        return;
+    }
+
+    const clienteNomeInfo = document.getElementById('cliente_nome');
+    const clienteNome = clienteNomeInfo ? clienteNomeInfo.value.trim() : '';
+    const clienteTelefoneInfo = document.getElementById('cliente_telefone');
+    const clienteTelefone = clienteTelefoneInfo ? clienteTelefoneInfo.value.trim() : '';
+    const dataEvento = document.getElementById('data_evento') ? document.getElementById('data_evento').value : '';
+    const horaEvento = document.getElementById('hora_evento') ? document.getElementById('hora_evento').value : '';
+    const localFesta = document.getElementById('local_festa') ? document.getElementById('local_festa').value.trim() : '';
+
+    if (!clienteNome) {
+        clienteNomeInfo.focus();
+        clienteNomeInfo.classList.add('border-red-500');
+        alert('⚠️ Por favor, informe seu nome completo.');
+        return;
+    }
+
+    if (!clienteTelefone) {
+        clienteTelefoneInfo.focus();
+        clienteTelefoneInfo.classList.add('border-red-500');
+        alert('⚠️ Por favor, informe seu WhatsApp.');
+        return;
+    }
+
+    if (!dataEvento) {
+        alert('⚠️ Por favor, informe a data da festa.');
+        return;
+    }
+    if (!horaEvento) {
+        alert('⚠️ Por favor, informe a hora da festa.');
+        return;
+    }
+    if (!localFesta) {
+        alert('⚠️ Por favor, informe a cidade e o local.');
+        return;
+    }
+
+    const partesData = dataEvento.split('-');
+    const dataFormatada = partesData.length === 3 ? `${partesData[2]}/${partesData[1]}/${partesData[0]}` : dataEvento;
+
+    const total = calcularTotais();
+    const qtyTotal = carrinho.reduce((s, i) => s + i.qty, 0);
+
+    const btn = document.getElementById('btn-whatsapp-orcamento');
+    const bkpHTML = btn.innerHTML;
+    btn.innerHTML = 'Processando...';
+    btn.disabled = true;
+
+    // Obs: Em orçamentos, nós não salvamos no banco na tabela pedidos porque o preço não está fechado.
+    // Vamos direto pro zap.
+    
+    let msg = '*🚀 ORÇAMENTO FESTA / EVENTO*\n';
+    msg += `👩‍🦱 *Cliente:* ${clienteNome} - Cel: ${clienteTelefone}\n`;
+    msg += `📍 *Local:* ${localFesta}\n`;
+    msg += `📅 *Quando:* ${dataFormatada} às ${horaEvento}\n`;
     msg += '─────────────────────\n';
+    msg += ' *📦 LISTA DE SALGADOS ESCOLHIDOS:*\n';
 
     carrinho.forEach(item => {
         const sub = (item.preco * item.qty).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -470,49 +628,108 @@ function enviarWhatsApp() {
 
     msg += '─────────────────────\n';
     msg += ` *Total de unidades:* ${qtyTotal}\n`;
-    msg += ` *Valor total:* ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n`;
-    msg += ` *Pagamento:* ${pagamento}\n`;
-    msg += ` *Estado:* ${estado}\n`;
-    msg += ` *Para quando:* ${dataFormatada} às ${horaPedido}\n`;
-
-    if (obs) {
-        msg += `📝 *Obs:* ${obs}\n`;
-    }
-
+    msg += ` *Estimativa bruta (Só Salgados):* ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n`;
+    msg += ` *⚠️ Lembrete:* Fritura no local e deslocamento pendente de cálculo pela Sogra.\n`;
     msg += '─────────────────────\n';
-    msg += '_Pedido enviado pelo site Salgados Dona Sogra_ 🍽';
+    msg += '_Aguardo retorno para fechar negócio!_ 🎉';
 
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
+    
+    carrinho = [];
+    salvarCarrinho();
+    
+    // Limpar modo evento do LocalStorage
+    localStorage.removeItem('ds_modo_evento');
+    isEvento = false;
+
+    window.location.href = url;
+}
+
+function carregarDadosDaLoja() {
+    fetch('api/get_loja_dados.php')
+        .then(r => r.json())
+        .then(data => {
+            if (data.sucesso) {
+                PRODUTOS = data.produtos;
+                const conf = data.configuracoes;
+                if (conf) {
+                    if (conf.min_qty) MIN_QTY = parseInt(conf.min_qty, 10);
+                    if (conf.step_qty_index) STEP_QTY_INDEX = parseInt(conf.step_qty_index, 10);
+                    if (conf.step_qty_cart) STEP_QTY_CART = parseInt(conf.step_qty_cart, 10);
+                }
+                
+                // Funções index
+                if (document.getElementById('product-grid')) {
+                    renderizarProdutos();
+                    iniciarCarousel();
+                }
+
+                // Funções cart
+                if (document.getElementById('cart-items-list')) {
+                    
+                    // O alerta-evento só servia no modo integrado, mas como o usuário quis
+                    // a rota nova, não faz sentido aqui, porém vamos deixar robusto
+                    const params = new URLSearchParams(window.location.search);
+                    const hasEventoParam = params.get('mode') === 'evento';
+                    const hasEventoLocal = localStorage.getItem('ds_modo_evento') === 'true';
+                    
+                    if (hasEventoParam || hasEventoLocal) {
+                        isEvento = true;
+                        const alertEl = document.getElementById('alerta-evento');
+                        if (alertEl) alertEl.classList.remove('hidden');
+                        const obsEl = document.getElementById('obs');
+                        if (obsEl) obsEl.placeholder = 'Informe a cidade e local da festa...';
+                    }
+
+                    renderizarCarrinho();
+
+                    // Listeners para selects do Resumo
+                    const pagamentoEl = document.getElementById('pagamento');
+                    if (pagamentoEl) pagamentoEl.addEventListener('change', atualizarResumoSelects);
+
+                    const estadoEl = document.getElementById('estado');
+                    if (estadoEl) estadoEl.addEventListener('change', atualizarResumoSelects);
+
+                    const dataEl = document.getElementById('data_pedido');
+                    if (dataEl) dataEl.addEventListener('change', atualizarResumoSelects);
+
+                    const horaEl = document.getElementById('hora_pedido');
+                    if (horaEl) horaEl.addEventListener('change', atualizarResumoSelects);
+                }
+            } else {
+                console.error("Erro ao carregar dados:", data.erro);
+            }
+        })
+        .catch(err => {
+            console.error("Problema no fetch:", err);
+            
+            // FALLBACK: Como vc está testando localmente sem banco, vamos popular os produtos falsos
+            // para que a tela não fique em branco e você consiga testar o visual de Eventos.
+            if (PRODUTOS.length === 0) {
+                PRODUTOS = [
+                    { id: 'coxinha de frango', nome: 'Coxinha de Frango', desc: 'Massa crocante.', preco: 0.85, img: 'img/coxinha.png' },
+                    { id: 'bolinha de queijo', nome: 'Bolinha de Queijo', desc: 'Massa crocante.', preco: 0.85, img: 'img/bolinha_queijo.jpg' },
+                    { id: 'kibe', nome: 'Kibe', desc: 'Kibe tradicional.', preco: 0.85, img: 'img/kibe.png' },
+                    { id: 'trouxinha de calabresa', nome: 'Trouxinha de Calabresa', desc: 'Massa crocante.', preco: 0.85, img: 'img/almofadinha_calabresa_e_queijo.jpg' },
+                    { id: 'enrroladinho de salsicha', nome: 'Enrroladinho de Salsicha', desc: 'Massa crocante.', preco: 0.85, img: 'img/croquete_de_salsicha.png' },
+                    { id: 'coxinha de carne', nome: 'Coxinha de Carne', desc: 'Massa crocante.', preco: 0.85, img: 'img/coxinha_de_carne.png' },
+                    { id: 'kibe com queijo', nome: 'Kibolinha', desc: 'Kibe com queijo.', preco: 0.85, img: 'img/kibolinha.png' },
+                    { id: 'fataya', nome: 'Fataya', desc: 'Massa fininha.', preco: 1.00, img: 'img/fataya.jpeg' }
+                ];
+            }
+
+            // Fallback render...
+            if (document.getElementById('product-grid')) renderizarProdutos();
+            if (document.getElementById('cart-items-list')) renderizarCarrinho();
+        });
 }
 
 /* ─────────────────────────────────────────────────────────
    HOOKS DE DOM CARREGADO GLOBAL
 ───────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-    // Funções index
-    if (document.getElementById('product-grid')) {
-        renderizarProdutos();
-        iniciarCarousel();
-    }
-
-    // Funções cart
-    if (document.getElementById('cart-items-list')) {
-        renderizarCarrinho();
-
-        // Listeners para selects do Resumo
-        const pagamentoEl = document.getElementById('pagamento');
-        if (pagamentoEl) pagamentoEl.addEventListener('change', atualizarResumoSelects);
-
-        const estadoEl = document.getElementById('estado');
-        if (estadoEl) estadoEl.addEventListener('change', atualizarResumoSelects);
-
-        const dataEl = document.getElementById('data_pedido');
-        if (dataEl) dataEl.addEventListener('change', atualizarResumoSelects);
-
-        const horaEl = document.getElementById('hora_pedido');
-        if (horaEl) horaEl.addEventListener('change', atualizarResumoSelects);
-    }
+    // Carrega produtos dinamicamente e então renderiza a parte correta
+    carregarDadosDaLoja();
 
     // Atualiza badges em qualquer tela (só requer a div badge)
     atualizarBadges();

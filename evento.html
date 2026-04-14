@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Orçamento Festa – Salgados Dona Sogra</title>
+    <meta name="description" content="Simule o orçamento para o seu evento." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#C0392B',
+                            cream: '#FFF8F0',
+                            dark: '#1A1A1A',
+                            gold: '#F0A500',
+                            yellow: '#FBBF24',
+                        }
+                    },
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="bg-gray-50 font-sans text-brand-dark antialiased min-h-screen flex flex-col">
+
+    <!-- ═══════════════════════════════════════════════════════
+     BARRA DE AVISOS
+════════════════════════════════════════════════════════ -->
+    <div class="bg-brand-dark text-brand-gold font-bold text-xs text-center py-2 px-4 shadow">
+        🎉 Seu Orçamento de Festa / Evento
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+     HEADER
+════════════════════════════════════════════════════════ -->
+    <header class="sticky top-0 z-50 shadow-lg">
+        <div class="bg-brand-dark flex items-center justify-between px-5 sm:px-10 py-3">
+            <a href="index.html" class="flex items-center gap-3">
+                <div class="flex-shrink-0">
+                    <img src="img/logo.png" alt="Logo Dona Sogra" class="h-16 w-auto object-contain" />
+                </div>
+                <div class="hidden sm:block">
+                    <p class="text-white font-black text-xl leading-tight tracking-wide">Dona Sogra</p>
+                    <p class="text-brand-gold text-[11px] font-semibold tracking-widest uppercase">Salgados Artesanais
+                    </p>
+                </div>
+            </a>
+            <nav class="flex items-center gap-4 text-white text-sm font-semibold">
+                <a href="index.html" class="flex items-center gap-1 hover:text-brand-gold transition-colors">‹ Voltar e
+                    Adicionar</a>
+            </nav>
+        </div>
+        <div class="bg-brand-gold border-b border-yellow-500 px-6 sm:px-10 py-2 hidden sm:block text-center">
+            <p class="text-brand-dark text-sm font-bold tracking-wide">
+                Você receberá um orçamento completo da nossa equipe, incluindo a taxa de deslocamento e fritura no
+                local!
+            </p>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════
+     CONTEÚDO PRINCIPAL
+════════════════════════════════════════════════════════ -->
+    <main
+        class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-8 py-10 lg:grid lg:grid-cols-[1fr_380px] lg:gap-8 items-start">
+
+        <!-- ── LADO ESQUERDO: Lista de itens do orçamento ── -->
+        <div>
+            <h1 class="font-black text-2xl sm:text-3xl mb-6 flex items-center gap-2 text-brand-red">
+                📋 Orçamento de Evento
+                <span id="item-count-label" class="text-sm font-semibold text-gray-400"></span>
+            </h1>
+
+            <!-- Tabela de itens -->
+            <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+                <div
+                    class="hidden sm:grid grid-cols-[80px_1fr_120px_110px_40px] gap-4 items-center px-6 py-3 bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wide">
+                    <span>Imagem</span>
+                    <span>Salgado</span>
+                    <span class="text-center">Preço</span>
+                    <span class="text-center">Qtd</span>
+                    <span></span>
+                </div>
+
+                <!-- Lista (reaproveitada do script.js) -->
+                <div id="cart-items-list"></div>
+
+                <!-- Estado vazio -->
+                <div id="cart-empty" class="hidden py-16 text-center">
+                    <p class="text-5xl mb-4">🎉</p>
+                    <p class="text-gray-400 font-semibold">Sua lista de evento está vazia.</p>
+                    <a href="index.html"
+                        class="mt-4 inline-block bg-brand-gold text-brand-dark font-bold px-6 py-3 rounded-full text-sm hover:bg-yellow-400 transition">Escolher
+                        Salgados</a>
+                </div>
+            </div>
+
+            <!-- ── DADOS DO CLIENTE & EVENTO ── -->
+            <div class="mt-8 mb-6 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4 border-b pb-2">Detalhes do
+                    Evento</h3>
+                <div class="grid sm:grid-cols-2 gap-5">
+
+                    <div>
+                        <label for="cliente_nome" class="block text-sm font-bold text-brand-dark mb-1">
+                            Seu Nome <span class="text-brand-red">*</span>
+                        </label>
+                        <input type="text" id="cliente_nome" placeholder="Nome Completo"
+                            class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-gold transition font-semibold bg-gray-50" />
+                    </div>
+
+                    <div>
+                        <label for="cliente_telefone" class="block text-sm font-bold text-brand-dark mb-1">
+                            Seu WhatsApp <span class="text-brand-red">*</span>
+                        </label>
+                        <input type="tel" id="cliente_telefone" placeholder="(  )       -    "
+                            class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-gold transition font-semibold bg-gray-50" />
+                    </div>
+
+                    <div>
+                        <label for="data_evento" class="block text-sm font-bold text-brand-dark mb-1">
+                            📅 Data da Festa <span class="text-brand-red">*</span>
+                        </label>
+                        <input type="date" id="data_evento"
+                            class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-gold transition font-semibold bg-gray-50" />
+                    </div>
+
+                    <div>
+                        <label for="hora_evento" class="block text-sm font-bold text-brand-dark mb-1">
+                            ⏰ Horário Início <span class="text-brand-red">*</span>
+                        </label>
+                        <input type="time" id="hora_evento"
+                            class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-gold transition font-semibold bg-gray-50" />
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label for="local_festa" class="block text-sm font-bold text-brand-dark mb-1">
+                            📍 Cidade e Local do Evento <span class="text-brand-red">*</span>
+                        </label>
+                        <input type="text" id="local_festa" placeholder="Ex: Pirajuí - Chácara das Flores"
+                            class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-gold transition font-semibold bg-gray-50" />
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /esquerda -->
+
+        <!-- ── LADO DIREITO (sticky): Resumo da Simulação ── -->
+        <aside class="mt-8 lg:mt-0">
+            <div class="summary-sticky bg-white rounded-2xl shadow-xl overflow-hidden border border-brand-gold/50">
+
+                <div class="bg-brand-gold text-brand-dark px-6 py-4">
+                    <h2 class="font-black text-xl">Estimativa Confidencial</h2>
+                    <p class="text-brand-dark/80 text-xs mt-0.5">Estimativa apenas dos doces/salgados</p>
+                </div>
+
+                <div class="px-6 py-5 space-y-3" id="summary-lines"></div>
+
+                <div class="px-6 pb-5">
+                    <div class="border-t border-gray-100 pt-4 mb-4">
+                        <div class="flex justify-between items-center">
+                            <span class="font-black text-lg text-brand-dark">Salgados Bruto</span>
+                            <span id="subtotal-val" class="font-black text-xl text-brand-dark">R$ 0,00</span>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2 text-center">*Os valores de Fritura no Local e Deslocamento
+                            são adicionados pele nossa equipe manual após contato.</p>
+                    </div>
+
+                    <!-- BOTÃO ENVIAR ORÇAMENTO VIA WHATSAPP -->
+                    <button id="btn-whatsapp-orcamento" onclick="enviarOrcamentoWhatsApp()"
+                        class="w-full bg-brand-dark hover:bg-black active:scale-95 text-brand-gold font-black py-4 rounded-xl text-base flex items-center justify-center gap-2 transition-all shadow-lg mt-4">
+                        <span class="text-xl">🚀</span> Solicitar Orçamento
+                    </button>
+
+                    <p class="text-center text-gray-500 text-xs mt-3">
+                        Não se preocupe, sem compromisso! Vamos te passar os valores complementares pelo Whats.
+                    </p>
+                </div>
+            </div>
+        </aside>
+
+    </main>
+
+    <footer class="bg-brand-dark text-gray-500 text-xs text-center py-5 mt-auto">
+        <p>&copy; 2025 Salgados Dona Sogra – Pirajuí/SP. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- Variáveis Fantasmas para não quebrar o JS compartilhado do Carrinho -->
+    <input type="hidden" id="pagamento" value="A Combinar" />
+    <input type="hidden" id="estado" value="Fritos no Local" />
+    <input type="hidden" id="data_pedido" value="" />
+    <input type="hidden" id="hora_pedido" value="" />
+    <span id="frete-val" class="hidden"></span>
+    <span id="total-val" class="hidden"></span>
+
+    <script src="js/scripts.js"></script>
+</body>
+
+</html>
