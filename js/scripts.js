@@ -146,6 +146,8 @@ function adicionarAoCarrinho(produtoId) {
 
     if (existente) {
         existente.qty += qty;
+        existente.preco = produto.preco;
+        existente.nome = produto.nome;
     } else {
         carrinho.push({ ...produto, qty });
     }
@@ -513,6 +515,21 @@ function enviarWhatsApp() {
     }).then(r => r.json()).then(resp => {
         if (!resp.sucesso) {
             alert('Erro ao registrar pedido no sistema: ' + (resp.erro || 'Desconhecido'));
+            btn.innerHTML = bkpHTML;
+            btn.disabled = false;
+            return;
+        }
+
+        // RECUPA OS DADOS VALIDADOS DO BANCO DE DADOS (Anti-fraude e desatualização)
+        const itensValidados = resp.itens_atualizados || carrinho;
+        const totalValidado = resp.valor_total_real !== undefined ? resp.valor_total_real : total;
+        const qtyTotalValidada = itensValidados.reduce((s, i) => s + i.qty, 0);
+
+        if (itensValidados.length === 0) {
+            alert('Falha: Os itens do seu carrinho não estão mais disponíveis no sistema.');
+            btn.innerHTML = bkpHTML;
+            btn.disabled = false;
+            return;
         }
         
         // Continua montando a mensagem para o whatsapp
@@ -520,15 +537,15 @@ function enviarWhatsApp() {
         msg += `👩‍🦱 *Cliente:* ${clienteNome} - Cel: ${clienteTelefone}\n`;
         msg += '─────────────────────\n';
 
-        carrinho.forEach(item => {
+        itensValidados.forEach(item => {
             const sub = (item.preco * item.qty).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             msg += `• *${item.nome}*\n`;
             msg += `  ${item.qty} un. × ${item.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} = ${sub}\n`;
         });
 
         msg += '─────────────────────\n';
-        msg += ` *Total de unidades:* ${qtyTotal}\n`;
-        msg += ` *Valor total:* ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n`;
+        msg += ` *Total de unidades:* ${qtyTotalValidada}\n`;
+        msg += ` *Valor total:* ${totalValidado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n`;
         msg += ` *Pagamento:* ${pagamento}\n`;
         msg += ` *Estado:* ${estado}\n`;
         msg += ` *Para quando:* ${dataFormatada} às ${horaPedido}\n`;
@@ -651,6 +668,28 @@ function carregarDadosDaLoja() {
         .then(data => {
             if (data.sucesso) {
                 PRODUTOS = data.produtos;
+                
+                // Sincroniza os itens do carrinho com os dados mais recentes do banco
+                let carrinhoAtualizado = false;
+                carrinho = carrinho.filter(itemCart => {
+                    const dbProduto = PRODUTOS.find(p => p.id === itemCart.id);
+                    if (dbProduto) {
+                        if (itemCart.preco !== dbProduto.preco || itemCart.nome !== dbProduto.nome) {
+                            itemCart.preco = dbProduto.preco;
+                            itemCart.nome = dbProduto.nome;
+                            carrinhoAtualizado = true;
+                        }
+                        return true;
+                    }
+                    // Se o produto não existe mais no banco, remove do carrinho
+                    carrinhoAtualizado = true;
+                    return false;
+                });
+                
+                if (carrinhoAtualizado) {
+                    salvarCarrinho();
+                }
+
                 const conf = data.configuracoes;
                 if (conf) {
                     if (conf.min_qty) MIN_QTY = parseInt(conf.min_qty, 10);
