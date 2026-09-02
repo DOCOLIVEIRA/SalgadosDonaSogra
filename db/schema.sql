@@ -1,12 +1,9 @@
 -- ============================================================================
--- schema.sql - Estrutura do Banco de Dados MySQL (HostGator)
+-- schema.sql - Estrutura do Banco de Dados MySQL
 -- ============================================================================
--- Execute este script no phpMyAdmin ou via terminal MySQL para criar as
--- tabelas necessárias para o sistema Dona Sogra.
+-- Execute este script para criar as tabelas do sistema Dona Sogra.
 -- ============================================================================
 
-CREATE DATABASE IF NOT EXISTS do_oliveira_salgados;
-USE do_oliveira_salgados;
 
 -- ----------------------------------------------------------------------------
 -- TABELA: usuarios (Usuários do painel administrativo)
