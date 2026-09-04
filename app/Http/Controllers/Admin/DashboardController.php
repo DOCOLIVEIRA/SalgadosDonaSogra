@@ -7,57 +7,74 @@ use App\Models\ItemPedido;
 use App\Models\Pedido;
 use App\Models\Produto;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $totalPedidos = Pedido::count();
-        $pedidosPendentes = Pedido::where('status', 'Aguardando Confirmação')->orWhere('status', 'Pendente')->count();
-        $faturamentoTotal = Pedido::whereNotIn('status', ['Cancelado', 'Expirado'])->sum('valor_total');
-        $totalProdutos = Produto::where('ativo', true)->count();
-        
-        $ultimosPedidos = Pedido::with('itens.produto')
-            ->latest()
-            ->take(5)
-            ->get();
+        $dia = $request->input('dia');
+        $mes = $request->input('mes');
+        $ano = $request->input('ano', date('Y'));
 
-        // 📊 DADOS PARA O GRÁFICO DE VENDAS (Por dia)
-        $vendasPorDia = Pedido::select(
+        // Query Base de Pedidos Válidos
+        $queryPedidos = Pedido::whereNotIn('status', ['Cancelado', 'Expirado']);
+
+        if ($ano) {
+            $queryPedidos->whereYear('created_at', $ano);
+        }
+        if ($mes) {
+            $queryPedidos->whereMonth('created_at', $mes);
+        }
+        if ($dia) {
+            $queryPedidos->whereDay('created_at', $dia);
+        }
+
+        $totalPedidos = (clone $queryPedidos)->count();
+        $faturamentoTotal = (clone $queryPedidos)->sum('valor_total');
+        $pedidosPendentes = Pedido::whereIn('status', ['Aguardando Confirmação', 'Pendente'])->count();
+        $totalProdutos = Produto::where('ativo', true)->count();
+
+        // 📊 DADOS PARA O GRÁFICO DE VENDAS
+        $vendasQuery = Pedido::select(
             DB::raw('DATE(created_at) as data'),
             DB::raw('SUM(valor_total) as total')
         )
-        ->whereNotIn('status', ['Cancelado', 'Expirado'])
-        ->groupBy('data')
-        ->orderBy('data', 'ASC')
-        ->take(7)
-        ->get();
+        ->whereNotIn('status', ['Cancelado', 'Expirado']);
 
-        $diasLabels = $vendasPorDia->pluck('data')->map(fn($d) => date('d/m', strtotime($d)))->toArray();
+        if ($ano) $vendasQuery->whereYear('created_at', $ano);
+        if ($mes) $vendasQuery->whereMonth('created_at', $mes);
+        if ($dia) $vendasQuery->whereDay('created_at', $dia);
+
+        $vendasPorDia = $vendasQuery->groupBy('data')->orderBy('data', 'ASC')->get();
+        $diasLabels = $vendasPorDia->pluck('data')->map(fn($d) => date('d/m/Y', strtotime($d)))->toArray();
         $vendasValores = $vendasPorDia->pluck('total')->toArray();
 
-        // 🥐 DADOS PARA O GRÁFICO DE ESTOQUE
-        $produtosEstoque = Produto::where('ativo', true)->get();
-        $estoqueLabels = $produtosEstoque->pluck('nome')->toArray();
-        $estoqueValores = $produtosEstoque->pluck('estoque_atual')->toArray();
-
-        // 📈 ANÁLISE DE CURVA ABC (Ranking de Vendas por Faturamento)
-        $rankingProdutos = ItemPedido::select(
+        // 🥐 DADOS DE SAÍDA DE PRODUTOS NO PERÍODO FILTRADO
+        $saidaProdutosQuery = ItemPedido::select(
             'produto_id',
-            DB::raw('SUM(quantidade) as total_unidades'),
-            DB::raw('SUM(quantidade * preco_unitario) as faturamento_total')
+            DB::raw('SUM(quantidade) as total_saida'),
+            DB::raw('SUM(quantidade * preco_unitario) as faturamento_item')
         )
+        ->whereHas('pedido', function ($q) use ($ano, $mes, $dia) {
+            $q->whereNotIn('status', ['Cancelado', 'Expirado']);
+            if ($ano) $q->whereYear('created_at', $ano);
+            if ($mes) $q->whereMonth('created_at', $mes);
+            if ($dia) $q->whereDay('created_at', $dia);
+        })
         ->groupBy('produto_id')
-        ->orderBy('faturamento_total', 'DESC')
-        ->with('produto')
-        ->get();
+        ->orderBy('total_saida', 'DESC')
+        ->with('produto');
 
-        $faturamentoGeral = $rankingProdutos->sum('faturamento_total') ?: 1;
+        $saidaProdutos = $saidaProdutosQuery->get();
+
+        // 📈 ANÁLISE DE CURVA ABC NO PERÍODO
+        $faturamentoGeral = $saidaProdutos->sum('faturamento_item') ?: 1;
         $acumulado = 0;
 
-        $curvaABC = $rankingProdutos->map(function ($item) use ($faturamentoGeral, &$acumulado) {
-            $percentual = ($item->faturamento_total / $faturamentoGeral) * 100;
+        $curvaABC = $saidaProdutos->map(function ($item) use ($faturamentoGeral, &$acumulado) {
+            $percentual = ($item->faturamento_item / $faturamentoGeral) * 100;
             $acumulado += $percentual;
 
             $classe = 'C';
@@ -69,12 +86,19 @@ class DashboardController extends Controller
 
             return [
                 'produto' => $item->produto->nome ?? 'Produto Removido',
-                'unidades' => $item->total_unidades,
-                'faturamento' => $item->faturamento_total,
+                'unidades' => $item->total_saida,
+                'faturamento' => $item->faturamento_item,
                 'percentual' => round($percentual, 1),
                 'classe' => $classe,
             ];
         });
+
+        // Gráfico de Estoque Geral
+        $produtosEstoque = Produto::where('ativo', true)->get();
+        $estoqueLabels = $produtosEstoque->pluck('nome')->toArray();
+        $estoqueValores = $produtosEstoque->pluck('estoque_atual')->toArray();
+
+        $ultimosPedidos = Pedido::with('itens.produto')->latest()->take(5)->get();
 
         return view('admin.dashboard', compact(
             'totalPedidos',
@@ -86,7 +110,11 @@ class DashboardController extends Controller
             'vendasValores',
             'estoqueLabels',
             'estoqueValores',
-            'curvaABC'
+            'curvaABC',
+            'saidaProdutos',
+            'dia',
+            'mes',
+            'ano'
         ));
     }
 }
