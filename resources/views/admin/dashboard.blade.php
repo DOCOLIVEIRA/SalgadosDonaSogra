@@ -34,9 +34,11 @@
                 <img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-10 w-auto">
                 <span class="font-black text-xl text-brand-gold tracking-wide">Dona Sogra - Painel Admin</span>
             </div>
-            <a href="{{ url('/') }}" target="_blank" class="text-xs bg-brand-gold text-brand-dark font-bold px-4 py-2 rounded-full hover:bg-yellow-300 transition">
-                🌐 Ver Loja Pública
-            </a>
+            <nav class="flex items-center gap-4 text-sm font-semibold">
+                <a href="{{ url('/admin') }}" class="text-brand-gold font-bold">📊 Dashboard</a>
+                <a href="{{ url('/admin/produtos') }}" class="hover:text-brand-gold transition">🥐 Produtos & Estoque</a>
+                <a href="{{ url('/') }}" target="_blank" class="text-xs bg-brand-gold text-brand-dark font-bold px-3 py-1.5 rounded-full hover:bg-yellow-300 transition">🌐 Loja Pública</a>
+            </nav>
         </div>
     </header>
 

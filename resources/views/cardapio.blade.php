@@ -21,10 +21,10 @@
                 extend: {
                     colors: {
                         brand: {
-                            red: '#C0392B',
-                            cream: '#FFF8F0',
-                            dark: '#1A1A1A',
-                            gold: '#F0A500',
+                            red:    '#C0392B',
+                            cream:  '#FFF8F0',
+                            dark:   '#1A1A1A',
+                            gold:   '#F0A500',
                             yellow: '#FBBF24',
                         }
                     },
