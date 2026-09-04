@@ -25,3 +25,13 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# AI and Agents
+.agents/
+AGENTS.md
+CLAUDE.md
+.gemini/
+brain/
+artifacts/
+.roo/
+.copilot/
