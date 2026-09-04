@@ -2,6 +2,27 @@
 
 ## 📜 Histórico de Sessões e Decisões
 
+### [2026-09-04] - Restauração Visual do Layout Original e Implementação de Rotas /carrinho e /evento
+- **Agentes Envolvidos**: Orquestrador, Full Stack, Designer UX
+- **Decisão / Escopo**: 
+  - Restauração completa do layout original da marca Dona Sogra (Tailwind, marca, carrossel de banners, fontes Outfit) na View Blade [`cardapio.blade.php`](file:///f:/xamp/htdocs/donasogra/resources/views/cardapio.blade.php).
+  - Publicação de todos os assets públicos em `public/css/`, `public/js/` e `public/img/`.
+  - Resolução do erro 404 da página do carrinho criando as views [`carrinho.blade.php`](file:///f:/xamp/htdocs/donasogra/resources/views/carrinho.blade.php) e [`evento.blade.php`](file:///f:/xamp/htdocs/donasogra/resources/views/evento.blade.php).
+  - Configuração dos Controllers [`CarrinhoController.php`](file:///f:/xamp/htdocs/donasogra/app/Http/Controllers/CarrinhoController.php) e [`EventoController.php`](file:///f:/xamp/htdocs/donasogra/app/Http/Controllers/EventoController.php).
+  - Registro de rotas amigáveis `/carrinho` e `/evento` em [`routes/web.php`](file:///f:/xamp/htdocs/donasogra/routes/web.php) com redirecionamentos de compatibilidade para arquivos estáticos soltos antigos (`cart.html` e `evento.html`).
+  - Integração do JavaScript do front-end com os endpoints de API REST `/api/produtos` e `/api/pedidos` com suporte a CSRF Token.
+- **Alterações Realizadas**:
+  - `resources/views/carrinho.blade.php`: Nova view Blade do carrinho.
+  - `resources/views/evento.blade.php`: Nova view Blade de orçamento de eventos.
+  - `app/Http/Controllers/CarrinhoController.php`: Controller da tela de carrinho.
+  - `app/Http/Controllers/EventoController.php`: Controller da tela de evento.
+  - `routes/web.php`: Mapeamento de rotas e redirects do Laravel.
+  - `public/js/scripts.js`: Integração com API REST e ajuste de rotas.
+- **Próximos Passos / Pendências**:
+  - Desenvolver o Painel Administrativo em Laravel para gestão de pedidos e estoque pelos funcionários.
+
+---
+
 ### [2026-09-04] - Migração para Arquitetura Framework Laravel + Docker + WCAG + API REST
 - **Agentes Envolvidos**: Orquestrador, Full Stack, DBA Master, Designer UX
 - **Decisão / Escopo**: 
