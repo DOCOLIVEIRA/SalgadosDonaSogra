@@ -2,6 +2,31 @@
 
 ## 📜 Histórico de Sessões e Decisões
 
+### [2026-09-04] - Migração para Arquitetura Framework Laravel + Docker + WCAG + API REST
+- **Agentes Envolvidos**: Orquestrador, Full Stack, DBA Master, Designer UX
+- **Decisão / Escopo**: 
+  - Instalação e migração completa do projeto para o **Laravel Framework**.
+  - Criação de imagem Docker customizada em [`Dockerfile`](file:///f:/xamp/htdocs/donasogra/Dockerfile) com suporte ao Composer, PHP 8.3 e extensões.
+  - Implementação do padrão **MVC** (Models, Views em Blade, Controllers).
+  - Criação de **Migrations** e **Seeders** (`ProdutoSeeder`) para gerenciamento declarativo do banco de dados no Laravel.
+  - Criação de **APIs REST** JSON (`/api/produtos` e `/api/pedidos`) com reserva temporária de estoque no banco.
+  - Criação da rotina em segundo plano / Artisan Command [`LimparPedidosExpirados.php`](file:///f:/xamp/htdocs/donasogra/app/Console/Commands/LimparPedidosExpirados.php) (`php artisan pedidos:limpar-expirados`) para cancelar automaticamente pedidos sem confirmação após 24h e devolver salgados ao estoque.
+  - Implementação de **Acessibilidade WCAG 2.1** (atalho skip-link, marcação semântica ARIA, controles touch mobile de 44px+) na View Blade [`cardapio.blade.php`](file:///f:/xamp/htdocs/donasogra/resources/views/cardapio.blade.php).
+  - Criação de **Testes Automatizados de Integração** (PHPUnit) em [`ProdutoApiTest.php`](file:///f:/xamp/htdocs/donasogra/tests/Feature/ProdutoApiTest.php) (execução com sucesso 100% OK).
+- **Alterações Realizadas**:
+  - [`Dockerfile`](file:///f:/xamp/htdocs/donasogra/Dockerfile) & [`docker-compose.yml`](file:///f:/xamp/htdocs/donasogra/docker-compose.yml): Atualizados com Composer e Apache Rewrite.
+  - [`database/migrations/`](file:///f:/xamp/htdocs/donasogra/database/migrations): Migrations de `produtos`, `pedidos`, `itens_pedido` e `configuracoes`.
+  - [`app/Models/`](file:///f:/xamp/htdocs/donasogra/app/Models): Models Eloquent `Produto`, `Pedido`, `ItemPedido` com relacionamentos.
+  - [`app/Http/Controllers/Api/`](file:///f:/xamp/htdocs/donasogra/app/Http/Controllers/Api): `ProdutoController` e `PedidoController` REST APIs.
+  - [`app/Console/Commands/LimparPedidosExpirados.php`](file:///f:/xamp/htdocs/donasogra/app/Console/Commands/LimparPedidosExpirados.php): Comando de automação e devolução de estoque.
+  - [`resources/views/cardapio.blade.php`](file:///f:/xamp/htdocs/donasogra/resources/views/cardapio.blade.php): Template Blade responsivo com WCAG.
+  - [`tests/Feature/ProdutoApiTest.php`](file:///f:/xamp/htdocs/donasogra/tests/Feature/ProdutoApiTest.php): Suíte de testes automatizados.
+- **Próximos Passos / Pendências**:
+  - Conectar o envio final da compra com a API do WhatsApp a partir da resposta da API REST de pedidos.
+  - Desenvolver o Painel Administrativo em Laravel para gestão de pedidos e estoque.
+
+---
+
 ### [2026-09-02] - Inicialização do Diário de Bordo e Estruturação do Ambiente Docker
 - **Agentes Envolvidos**: Orquestrador, Full Stack, DBA Master, Designer UX
 - **Decisão / Escopo**: 
