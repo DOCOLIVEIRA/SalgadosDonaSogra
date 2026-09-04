@@ -1,8 +1,8 @@
-# Salgados Dona Sogra – Sistema Integrado (Web & Admin)
+Salgados Dona Sogra – Sistema Integrado (Web & Admin)
 
-Este é o repositório oficial do sistema "Salgados Dona Sogra", um projeto moderno desenvolvido em **Laravel 11** que contempla tanto a vitrine pública de produtos (Cardápio e Carrinho de Pedidos) quanto o Painel Administrativo de Gestão (Dashboard, Vendas, Estoque e Usuários).
+Este é o repositório oficial do sistema "Salgados Dona Sogra", projeto desenvolvido em **Laravel 11** que contempla tanto a vitrine pública de produtos (Cardápio e Carrinho de Pedidos) quanto o Painel Administrativo de Gestão (Dashboard, Vendas, Estoque e Usuários).
 
-## Tecnologias e Linguagens Utilizadas
+Tecnologias e Linguagens Utilizadas
 
 - **Linguagem Principal:** PHP 8.3
 - **Framework Back-end:** Laravel 11
@@ -11,9 +11,8 @@ Este é o repositório oficial do sistema "Salgados Dona Sogra", um projeto mode
 - **Gráficos e BI:** Chart.js
 - **Infraestrutura/Deploy:** Docker e Docker Compose (Sail/Custom)
 
-##  Arquitetura do Projeto (MVC)
-
-O projeto segue rigorosamente o padrão arquitetural **MVC (Model-View-Controller)** nativo do Laravel:
+Arquitetura do Projeto (MVC)
+Projeto arquitetural **MVC (Model-View-Controller)** nativo do Laravel:
 
 - **Models (`app/Models`):** 
   - `User`: Responsável pela autenticação e gestão de usuários administrativos.
@@ -30,13 +29,13 @@ O projeto segue rigorosamente o padrão arquitetural **MVC (Model-View-Controlle
   - Layout mestre Admin: `layouts/admin.blade.php` (Garante DRY - Don't Repeat Yourself).
   - Páginas Admin: `admin/dashboard.blade.php`, `admin/vendas.blade.php`, etc.
 
-##  Segurança e Funcionalidades Core
+Segurança/Funcionalidades Core
 
 - **Middleware de Autenticação (`auth`):** Todas as rotas sob o prefixo `/admin` são protegidas. Ninguém sem sessão válida tem acesso às informações gerenciais.
 - **Integração de Estoque Automática:** Ao aprovar um pedido, o estoque diminui. Ao cancelar, o estoque é estornado perfeitamente.
 - **Alertas de Estoque Baixo:** O painel BI alerta instantaneamente caso algum salgado possua menos de 20 unidades.
 
-##  Como Rodar Localmente (Docker)
+Como Rodar Localmente (Docker)
 
 1. Clone o repositório ou navegue até a pasta do projeto.
 2. Certifique-se de que o **Docker Desktop** esteja rodando.
