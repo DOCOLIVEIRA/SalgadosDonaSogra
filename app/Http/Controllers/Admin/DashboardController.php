@@ -9,6 +9,7 @@ use App\Models\Produto;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -35,6 +36,37 @@ class DashboardController extends Controller
         $faturamentoTotal = (clone $queryPedidos)->sum('valor_total');
         $pedidosPendentes = Pedido::whereIn('status', ['Aguardando Confirmação', 'Pendente'])->count();
         $totalProdutos = Produto::where('ativo', true)->count();
+
+        // 📉 Cálculo de Crescimento do Faturamento (Comparação com período anterior)
+        // Lógica simples: se filtrou por mês, compara com o mês anterior. Se não filtrou por mês, compara com os últimos 30 dias.
+        $faturamentoAnterior = 0;
+        if ($mes && $ano) {
+            $mesAnterior = $mes - 1;
+            $anoAnterior = $ano;
+            if ($mesAnterior == 0) {
+                $mesAnterior = 12;
+                $anoAnterior--;
+            }
+            $faturamentoAnterior = Pedido::whereNotIn('status', ['Cancelado', 'Expirado'])
+                ->whereMonth('created_at', $mesAnterior)
+                ->whereYear('created_at', $anoAnterior)
+                ->sum('valor_total');
+        } else {
+            // Últimos 30 dias x 30 dias anteriores a esses
+            $faturamentoAnterior = Pedido::whereNotIn('status', ['Cancelado', 'Expirado'])
+                ->whereBetween('created_at', [Carbon::now()->subDays(60), Carbon::now()->subDays(30)])
+                ->sum('valor_total');
+        }
+
+        $crescimentoFaturamento = 0;
+        if ($faturamentoAnterior > 0) {
+            $crescimentoFaturamento = (($faturamentoTotal - $faturamentoAnterior) / $faturamentoAnterior) * 100;
+        } elseif ($faturamentoTotal > 0) {
+            $crescimentoFaturamento = 100;
+        }
+
+        // 🚨 Produtos com Estoque Crítico (Menos de 20)
+        $produtosAlerta = Produto::where('ativo', true)->where('estoque_atual', '<', 20)->orderBy('estoque_atual', 'ASC')->get();
 
         // 📊 DADOS PARA O GRÁFICO DE VENDAS
         $vendasQuery = Pedido::select(
@@ -105,6 +137,8 @@ class DashboardController extends Controller
             'pedidosPendentes',
             'faturamentoTotal',
             'totalProdutos',
+            'crescimentoFaturamento',
+            'produtosAlerta',
             'ultimosPedidos',
             'diasLabels',
             'vendasValores',
