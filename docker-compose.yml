@@ -1,10 +1,12 @@
 # ============================================================================
-# docker-compose.yml - Dona Sogra (Ambiente Docker Completo: Web + MySQL)
+# docker-compose.yml - Dona Sogra (Ambiente Docker Laravel + MySQL)
 # ============================================================================
 
 services:
   web:
-    image: php:8.3-apache
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: donasogra-web
     restart: always
     ports:
@@ -13,8 +15,6 @@ services:
       - .:/var/www/html
     depends_on:
       - db
-    command: >
-      bash -c "docker-php-ext-install pdo pdo_mysql && apache2-foreground"
 
   db:
     image: mysql:8.0
