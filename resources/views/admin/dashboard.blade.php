@@ -1,53 +1,7 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin – Salgados Dona Sogra</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            red: '#C0392B',
-                            cream: '#FFF8F0',
-                            dark: '#1A1A1A',
-                            gold: '#F0A500',
-                        }
-                    },
-                    fontFamily: { sans: ['Outfit', 'sans-serif'] }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="bg-gray-100 font-sans text-brand-dark min-h-screen flex flex-col">
+@extends('layouts.admin')
+@section('title', 'Dashboard – Salgados Dona Sogra')
 
-    <header class="bg-brand-dark text-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-10 w-auto">
-                <span class="font-black text-xl text-brand-gold tracking-wide">Painel Admin</span>
-                <span class="font-black text-xl text-brand-gold tracking-wide">Salgados Dona Sogra</span>
-            </div>
-            <nav class="flex items-center gap-4 text-sm font-semibold">
-                <a href="{{ url('/admin') }}" class="text-brand-gold font-bold">📊 Dashboard</a>
-                <a href="{{ url('/admin/vendas') }}" class="hover:text-brand-gold transition">💰 Vendas</a>
-                <a href="{{ url('/admin/produtos') }}" class="hover:text-brand-gold transition">🥐 Estoque</a>
-                <a href="{{ url('/admin/usuarios') }}" class="hover:text-brand-gold transition">👤 Usuários</a>
-                <a href="{{ url('/') }}" target="_blank" class="text-xs bg-brand-gold text-brand-dark font-bold px-3 py-1.5 rounded-full hover:bg-yellow-300 transition">🌐 Loja Pública</a>
-            </nav>
-        </div>
-    </header>
-
-    <main class="flex-1 max-w-7xl mx-auto w-full px-6 py-8 space-y-8">
-        
+@section('content')
         <!-- 🚀 AÇÕES RÁPIDAS -->
         <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
             <h1 class="font-black text-2xl text-brand-dark">Dashboard Geral</h1>
@@ -321,12 +275,9 @@
             </div>
         </div>
 
-    </main>
+@endsection
 
-    <footer class="bg-brand-dark text-gray-400 text-xs text-center py-4 mt-auto">
-        &copy; {{ date('Y') }} Salgados Dona Sogra – Painel Administrativo Laravel.
-    </footer>
-
+@push('scripts')
     <script>
         const ctxVendas = document.getElementById('vendasChart').getContext('2d');
         new Chart(ctxVendas, {
@@ -369,5 +320,4 @@
             }
         });
     </script>
-</body>
-</html>
+@endpush

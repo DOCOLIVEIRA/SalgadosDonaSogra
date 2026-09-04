@@ -1,49 +1,7 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Usuários – Admin Dona Sogra</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            red: '#C0392B',
-                            dark: '#1A1A1A',
-                            gold: '#F0A500',
-                        }
-                    },
-                    fontFamily: { sans: ['Outfit', 'sans-serif'] }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="bg-gray-100 font-sans text-brand-dark min-h-screen flex flex-col">
+@extends('layouts.admin')
+@section('title', 'Gestão de Usuários – Admin Dona Sogra')
 
-    <header class="bg-brand-dark text-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-10 w-auto">
-                <span class="font-black text-xl text-brand-gold">Dona Sogra - Gestão de Usuários</span>
-            </div>
-            <nav class="flex gap-4 text-sm font-semibold">
-                <a href="{{ url('/admin') }}" class="hover:text-brand-gold transition">📊 Dashboard</a>
-                <a href="{{ url('/admin/vendas') }}" class="hover:text-brand-gold transition">💰 Vendas</a>
-                <a href="{{ url('/admin/produtos') }}" class="hover:text-brand-gold transition">🥐 Estoque</a>
-                <a href="{{ url('/admin/usuarios') }}" class="text-brand-gold font-bold">👤 Usuários</a>
-                <a href="{{ url('/') }}" target="_blank" class="bg-brand-gold text-brand-dark font-bold px-3 py-1.5 rounded-full text-xs hover:bg-yellow-300 transition">🌐 Loja Pública</a>
-            </nav>
-        </div>
-    </header>
-
-    <main class="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
+@section('content')
 
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl mb-6 font-bold">
@@ -114,11 +72,4 @@
 
         </div>
 
-    </main>
-
-    <footer class="bg-brand-dark text-gray-400 text-xs text-center py-4">
-        &copy; {{ date('Y') }} Salgados Dona Sogra – Gestão de Usuários.
-    </footer>
-
-</body>
-</html>
+@endsection
