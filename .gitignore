@@ -30,6 +30,7 @@ Thumbs.db
 .agents/
 AGENTS.md
 CLAUDE.md
+DIARIO_DE_BORDO.md
 .gemini/
 brain/
 artifacts/
