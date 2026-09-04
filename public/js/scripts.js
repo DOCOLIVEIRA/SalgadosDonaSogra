@@ -114,9 +114,9 @@ function irParaCarrinho() {
     // Roteador: Evento ou Carrinho Normal?
     const hasEventoLocal = localStorage.getItem('ds_modo_evento') === 'true';
     if (isEvento || hasEventoLocal) {
-        window.location.href = 'evento.html';
+        window.location.href = '/evento';
     } else {
-        window.location.href = 'cart.html';
+        window.location.href = '/carrinho';
     }
 }
 
