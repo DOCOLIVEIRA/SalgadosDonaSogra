@@ -206,8 +206,57 @@
             </p>
         </div>
 
-        <!-- Grid de Produtos (injetado pelo JS do projeto) -->
-        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" role="list"></div>
+        <!-- Grid de Produtos (Renderizado nativamente pelo Blade) -->
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" role="list">
+            @forelse($produtos as $p)
+                <article class="product-card bg-white rounded-2xl overflow-hidden shadow-md flex flex-col" id="card-{{ $p->id }}">
+                    <!-- Imagem do produto -->
+                    <div class="relative overflow-hidden h-52 bg-gray-100 flex items-center justify-center">
+                        <img src="{{ asset($p->imagem ?? 'img/logo.png') }}" alt="{{ $p->nome }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" onerror="this.src='{{ asset('img/logo.png') }}'" />
+                        <span class="absolute top-3 left-3 bg-brand-red text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">Artesanal</span>
+                    </div>
+
+                    <!-- Conteúdo do card -->
+                    <div class="p-5 flex flex-col flex-1">
+                        <h3 class="font-black text-lg text-brand-dark leading-tight">{{ $p->nome }}</h3>
+                        <p class="text-gray-500 text-sm mt-1 flex-1">{{ $p->descricao ?? '' }}</p>
+
+                        <!-- Preços -->
+                        <div class="mt-4 flex items-end justify-between">
+                            <div>
+                                <p class="text-gray-400 text-xs">Preço por cento (100 un.)</p>
+                                <p class="text-brand-red font-black text-2xl">R$ {{ number_format($p->preco_unitario * 100, 2, ',', '.') }}<span class="text-sm font-normal text-gray-400"> /cento</span></p>
+                                <p class="text-gray-400 text-xs mt-0.5">50 un. = <strong class="text-gray-600">R$ {{ number_format($p->preco_unitario * 50, 2, ',', '.') }}</strong></p>
+                            </div>
+                        </div>
+
+                        <!-- CONTROLE DE QUANTIDADE -->
+                        <div class="mt-4">
+                            <label class="text-xs text-gray-500 font-semibold mb-1 block">Quantidade <span class="text-brand-red">(mín. 50)</span></label>
+                            <div class="flex items-center gap-2">
+                                <button onclick="alterarQty('{{ $p->id }}', -50)" aria-label="Diminuir"
+                                    class="w-9 h-9 rounded-full bg-gray-100 hover:bg-red-100 text-brand-red font-bold text-lg flex items-center justify-center transition border border-gray-200">−</button>
+
+                                <input id="qty-{{ $p->id }}" type="number" value="50" min="50" step="50"
+                                    class="w-16 text-center border border-gray-200 rounded-lg py-1.5 font-bold text-brand-dark text-sm focus:outline-none focus:ring-2 focus:ring-brand-red transition"
+                                    aria-label="Quantidade de {{ $p->nome }}" />
+
+                                <button onclick="alterarQty('{{ $p->id }}', 50)" aria-label="Aumentar"
+                                    class="w-9 h-9 rounded-full bg-gray-100 hover:bg-green-100 text-green-700 font-bold text-lg flex items-center justify-center transition border border-gray-200">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Botão Adicionar -->
+                        <button onclick="adicionarAoCarrinho('{{ $p->id }}')"
+                            class="mt-5 w-full bg-brand-red hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all shadow hover:shadow-lg active:scale-95 text-sm">
+                            🛒 Adicionar ao Carrinho
+                        </button>
+                    </div>
+                </article>
+            @empty
+                <p class="col-span-full text-center text-gray-500 py-10">Nenhum produto disponível no momento.</p>
+            @endforelse
+        </div>
     </section>
 
     <!-- ═══════════════════════════════════════════════════════  5. SEÇÃO SOBRE  ═══════════════════════════════════════════════════════ -->
@@ -319,7 +368,10 @@
     <!-- ═══════════════════════════════════════════════════════
      JAVASCRIPT
 ════════════════════════════════════════════════════════ -->
-    <script src="{{ asset('js/scripts.js') }}"></script>
+    <script>
+        window.INITIAL_PRODUTOS = @json($produtos);
+    </script>
+    <script src="{{ asset('js/scripts.js') }}?v={{ time() }}"></script>
 </body>
 
 </html>

@@ -1,7 +1,15 @@
 /* ─────────────────────────────────────────────────────────
    DADOS DOS PRODUTOS
 ───────────────────────────────────────────────────────── */
-let PRODUTOS = [];
+let PRODUTOS = (window.INITIAL_PRODUTOS && window.INITIAL_PRODUTOS.length > 0)
+    ? window.INITIAL_PRODUTOS.map(p => ({
+        id: String(p.id || p.slug),
+        nome: p.nome,
+        desc: p.descricao,
+        preco: parseFloat(p.preco_unitario || p.preco),
+        img: p.imagem || 'img/logo.png'
+    }))
+    : [];
 
 /* ─────────────────────────────────────────────────────────
    CONSTANTES / CONFIGURAÇÕES DINÂMICAS
