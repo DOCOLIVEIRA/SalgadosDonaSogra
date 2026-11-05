@@ -309,7 +309,7 @@
     <!-- ═══════════════════════════════════════════════════════
      JAVASCRIPT – CARRINHO & WHATSAPP
 ════════════════════════════════════════════════════════ -->
-    <script src="{{ asset('js/scripts.js') }}"></script>
+    <script src="{{ asset('js/scripts.js') }}?v={{ time() }}"></script>
 </body>
 
 </html>

@@ -139,25 +139,56 @@ function irParaCarrinho() {
  */
 function adicionarAoCarrinho(produtoId) {
     const qtyInput = document.getElementById('qty-' + produtoId);
-    let qty = parseInt(qtyInput.value, 10);
+    let qty = parseInt(qtyInput ? qtyInput.value : 50, 10);
 
     if (isNaN(qty) || qty < MIN_QTY) {
-        qtyInput.value = MIN_QTY;
-        qtyInput.classList.add('qty-warn', 'border-red-500', 'ring-2', 'ring-red-400');
-        setTimeout(() => qtyInput.classList.remove('qty-warn', 'border-red-500', 'ring-2', 'ring-red-400'), 800);
+        if (qtyInput) {
+            qtyInput.value = MIN_QTY;
+            qtyInput.classList.add('qty-warn', 'border-red-500', 'ring-2', 'ring-red-400');
+            setTimeout(() => qtyInput.classList.remove('qty-warn', 'border-red-500', 'ring-2', 'ring-red-400'), 800);
+        }
         mostrarToast(`⚠️ Mínimo de ${MIN_QTY} unidades por sabor!`, 'warn');
         return;
     }
 
-    const produto = PRODUTOS.find(p => p.id === produtoId);
-    const existente = carrinho.find(i => i.id === produtoId);
+    // Busca produto por ID flexível (String ou Number) ou por slug
+    let produto = PRODUTOS.find(p => String(p.id) === String(produtoId) || String(p.slug) === String(produtoId));
+
+    if (!produto && window.INITIAL_PRODUTOS && Array.isArray(window.INITIAL_PRODUTOS)) {
+        const initP = window.INITIAL_PRODUTOS.find(p => String(p.id) === String(produtoId) || String(p.slug) === String(produtoId));
+        if (initP) {
+            produto = {
+                id: String(initP.id),
+                nome: initP.nome,
+                desc: initP.descricao,
+                preco: parseFloat(initP.preco_unitario || initP.preco),
+                img: initP.imagem || 'img/logo.png'
+            };
+        }
+    }
+
+    if (!produto) {
+        console.error("Produto não localizado para o ID:", produtoId, PRODUTOS);
+        mostrarToast('Erro ao identificar o produto.', 'warn');
+        return;
+    }
+
+    const existente = carrinho.find(i => String(i.id) === String(produto.id));
 
     if (existente) {
         existente.qty += qty;
         existente.preco = produto.preco;
         existente.nome = produto.nome;
+        existente.img = produto.img;
     } else {
-        carrinho.push({ ...produto, qty });
+        carrinho.push({
+            id: String(produto.id),
+            nome: produto.nome,
+            desc: produto.desc || '',
+            preco: produto.preco,
+            img: produto.img || 'img/logo.png',
+            qty: qty
+        });
     }
 
     salvarCarrinho();
@@ -171,9 +202,10 @@ function adicionarAoCarrinho(produtoId) {
  */
 function alterarQty(produtoId, delta) {
     const input = document.getElementById('qty-' + produtoId);
+    if (!input) return;
     let val = parseInt(input.value, 10) + delta;
 
-    if (val < MIN_QTY) val = MIN_QTY;
+    if (isNaN(val) || val < MIN_QTY) val = MIN_QTY;
 
     input.value = val;
 }
@@ -294,8 +326,9 @@ function iniciarCarousel() {
  * @param {string} id 
  */
 function removerItem(id) {
-    carrinho = carrinho.filter(i => i.id !== id);
+    carrinho = carrinho.filter(i => String(i.id) !== String(id));
     localStorage.setItem('ds_carrinho', JSON.stringify(carrinho));
+    atualizarBadges();
     renderizarCarrinho();
 }
 
@@ -310,9 +343,10 @@ function alterarQtyCarrinho(id, novaQty) {
 
     if (isNaN(novaQty) || novaQty < MIN_QTY) novaQty = MIN_QTY;
 
-    const item = carrinho.find(i => i.id === id);
+    const item = carrinho.find(i => String(i.id) === String(id));
     if (item) item.qty = novaQty;
     localStorage.setItem('ds_carrinho', JSON.stringify(carrinho));
+    atualizarBadges();
     renderizarCarrinho();
 }
 
