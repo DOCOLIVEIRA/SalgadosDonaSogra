@@ -36,6 +36,32 @@ Route::get('/setup-admin', function () {
             });
         }
 
+        // Garante colunas de timestamps em pedidos
+        if (Schema::hasTable('pedidos')) {
+            if (!Schema::hasColumn('pedidos', 'created_at')) {
+                Schema::table('pedidos', function ($table) {
+                    $table->timestamps();
+                });
+                if (Schema::hasColumn('pedidos', 'criado_em')) {
+                    \Illuminate\Support\Facades\DB::statement('UPDATE pedidos SET created_at = criado_em WHERE criado_em IS NOT NULL');
+                }
+            }
+        }
+
+        // Garante colunas de timestamps em produtos
+        if (Schema::hasTable('produtos') && !Schema::hasColumn('produtos', 'created_at')) {
+            Schema::table('produtos', function ($table) {
+                $table->timestamps();
+            });
+        }
+
+        // Garante colunas de timestamps em itens_pedido
+        if (Schema::hasTable('itens_pedido') && !Schema::hasColumn('itens_pedido', 'created_at')) {
+            Schema::table('itens_pedido', function ($table) {
+                $table->timestamps();
+            });
+        }
+
         $user = User::updateOrCreate(
             ['email' => 'admin@donasogra.com'],
             [
@@ -46,7 +72,7 @@ Route::get('/setup-admin', function () {
 
         return response()->json([
             'success' => true,
-            'message' => 'Tabela users e usuario Administrador configurados com sucesso!',
+            'message' => 'Tabelas sincronizadas (users, pedidos, produtos) e Administrador configurado com sucesso!',
             'email' => $user->email,
         ]);
     } catch (\Throwable $e) {
