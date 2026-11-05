@@ -10,6 +10,18 @@ use Illuminate\Support\Facades\Schema;
 Route::get('/produtos', [ProdutoController::class, 'index']);
 Route::post('/pedidos', [PedidoController::class, 'store']);
 
+Route::get('/check-db', function () {
+    try {
+        $tables = \Illuminate\Support\Facades\DB::select('SHOW TABLES');
+        return response()->json([
+            'success' => true,
+            'tables' => $tables,
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+});
+
 Route::get('/setup-admin', function () {
     try {
         if (!Schema::hasTable('users')) {
