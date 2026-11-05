@@ -12,7 +12,11 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 
 // Rota para rodar as migrações e seed inicial sem precisar de SSH
-Route::get('/migrar-banco', function () {
+Route::withoutMiddleware([
+    \Illuminate\Session\Middleware\StartSession::class,
+    \Illuminate\Cookie\Middleware\EncryptCookies::class,
+    \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+])->get('/migrar-banco', function () {
     try {
         Artisan::call('migrate --force');
         $output = Artisan::output();
@@ -20,7 +24,7 @@ Route::get('/migrar-banco', function () {
         $output .= "\n" . Artisan::output();
         return '<h2>Banco de dados configurado com sucesso!</h2><pre>' . htmlspecialchars($output) . '</pre><br><a href="/">Ir para o Cardápio</a>';
     } catch (\Throwable $e) {
-        return '<h2>Erro ao conectar/migrar:</h2><pre>' . htmlspecialchars($e->getMessage()) . "\n" . htmlspecialchars($e->getTraceAsString()) . '</pre>';
+        return '<h2>Erro ao conectar/migrar:</h2><pre>' . htmlspecialchars($e->getMessage()) . "\n\nArquivo: " . $e->getFile() . ':' . $e->getLine() . "\n\n" . htmlspecialchars($e->getTraceAsString()) . '</pre>';
     }
 });
 
