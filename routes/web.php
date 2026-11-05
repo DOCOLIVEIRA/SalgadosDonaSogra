@@ -12,11 +12,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 
 // Rota para rodar as migrações e seed inicial sem precisar de SSH
-Route::withoutMiddleware([
-    \Illuminate\Session\Middleware\StartSession::class,
-    \Illuminate\Cookie\Middleware\EncryptCookies::class,
-    \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
-])->get('/migrar-banco', function () {
+Route::get('/migrar-banco', function () {
     try {
         Artisan::call('migrate --force');
         $output = Artisan::output();
