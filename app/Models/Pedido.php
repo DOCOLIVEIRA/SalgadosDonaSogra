@@ -29,4 +29,15 @@ class Pedido extends Model
     {
         return $this->hasMany(ItemPedido::class, 'pedido_id');
     }
+
+    public function getCreatedAtAttribute($value)
+    {
+        if ($value) {
+            return \Carbon\Carbon::parse($value);
+        }
+        if (isset($this->attributes['criado_em']) && $this->attributes['criado_em']) {
+            return \Carbon\Carbon::parse($this->attributes['criado_em']);
+        }
+        return now();
+    }
 }

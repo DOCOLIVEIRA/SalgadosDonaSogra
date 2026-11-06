@@ -13,7 +13,8 @@ class VendaController extends Controller
 {
     public function index(): View
     {
-        $pedidos = Pedido::with('itens.produto')->latest()->get();
+        $colData = \Illuminate\Support\Facades\Schema::hasColumn('pedidos', 'created_at') ? 'created_at' : (\Illuminate\Support\Facades\Schema::hasColumn('pedidos', 'criado_em') ? 'criado_em' : 'id');
+        $pedidos = Pedido::with('itens.produto')->orderBy($colData, 'desc')->get();
         return view('admin.vendas', compact('pedidos'));
     }
 

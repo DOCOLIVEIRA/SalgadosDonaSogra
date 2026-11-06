@@ -9,6 +9,7 @@ use App\Models\Produto;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -19,17 +20,20 @@ class DashboardController extends Controller
         $mes = $request->input('mes');
         $ano = $request->input('ano', date('Y'));
 
+        // Identifica coluna de data (created_at ou criado_em)
+        $colData = Schema::hasColumn('pedidos', 'created_at') ? 'created_at' : (Schema::hasColumn('pedidos', 'criado_em') ? 'criado_em' : 'id');
+
         // Query Base de Pedidos Válidos
         $queryPedidos = Pedido::whereNotIn('status', ['Cancelado', 'Expirado']);
 
         if ($ano) {
-            $queryPedidos->whereYear('created_at', $ano);
+            $queryPedidos->whereYear($colData, $ano);
         }
         if ($mes) {
-            $queryPedidos->whereMonth('created_at', $mes);
+            $queryPedidos->whereMonth($colData, $mes);
         }
         if ($dia) {
-            $queryPedidos->whereDay('created_at', $dia);
+            $queryPedidos->whereDay($colData, $dia);
         }
 
         $totalPedidos = (clone $queryPedidos)->count();
@@ -38,7 +42,6 @@ class DashboardController extends Controller
         $totalProdutos = Produto::where('ativo', true)->count();
 
         // 📉 Cálculo de Crescimento do Faturamento (Comparação com período anterior)
-        // Lógica simples: se filtrou por mês, compara com o mês anterior. Se não filtrou por mês, compara com os últimos 30 dias.
         $faturamentoAnterior = 0;
         if ($mes && $ano) {
             $mesAnterior = $mes - 1;
@@ -48,13 +51,12 @@ class DashboardController extends Controller
                 $anoAnterior--;
             }
             $faturamentoAnterior = Pedido::whereNotIn('status', ['Cancelado', 'Expirado'])
-                ->whereMonth('created_at', $mesAnterior)
-                ->whereYear('created_at', $anoAnterior)
+                ->whereMonth($colData, $mesAnterior)
+                ->whereYear($colData, $anoAnterior)
                 ->sum('valor_total');
         } else {
-            // Últimos 30 dias x 30 dias anteriores a esses
             $faturamentoAnterior = Pedido::whereNotIn('status', ['Cancelado', 'Expirado'])
-                ->whereBetween('created_at', [Carbon::now()->subDays(60), Carbon::now()->subDays(30)])
+                ->whereBetween($colData, [Carbon::now()->subDays(60), Carbon::now()->subDays(30)])
                 ->sum('valor_total');
         }
 
@@ -70,14 +72,14 @@ class DashboardController extends Controller
 
         // 📊 DADOS PARA O GRÁFICO DE VENDAS
         $vendasQuery = Pedido::select(
-            DB::raw('DATE(created_at) as data'),
+            DB::raw("DATE($colData) as data"),
             DB::raw('SUM(valor_total) as total')
         )
         ->whereNotIn('status', ['Cancelado', 'Expirado']);
 
-        if ($ano) $vendasQuery->whereYear('created_at', $ano);
-        if ($mes) $vendasQuery->whereMonth('created_at', $mes);
-        if ($dia) $vendasQuery->whereDay('created_at', $dia);
+        if ($ano) $vendasQuery->whereYear($colData, $ano);
+        if ($mes) $vendasQuery->whereMonth($colData, $mes);
+        if ($dia) $vendasQuery->whereDay($colData, $dia);
 
         $vendasPorDia = $vendasQuery->groupBy('data')->orderBy('data', 'ASC')->get();
         $diasLabels = $vendasPorDia->pluck('data')->map(fn($d) => date('d/m/Y', strtotime($d)))->toArray();
@@ -89,11 +91,11 @@ class DashboardController extends Controller
             DB::raw('SUM(quantidade) as total_saida'),
             DB::raw('SUM(quantidade * preco_unitario) as faturamento_item')
         )
-        ->whereHas('pedido', function ($q) use ($ano, $mes, $dia) {
+        ->whereHas('pedido', function ($q) use ($colData, $ano, $mes, $dia) {
             $q->whereNotIn('status', ['Cancelado', 'Expirado']);
-            if ($ano) $q->whereYear('created_at', $ano);
-            if ($mes) $q->whereMonth('created_at', $mes);
-            if ($dia) $q->whereDay('created_at', $dia);
+            if ($ano) $q->whereYear($colData, $ano);
+            if ($mes) $q->whereMonth($colData, $mes);
+            if ($dia) $q->whereDay($colData, $dia);
         })
         ->groupBy('produto_id')
         ->orderBy('total_saida', 'DESC')
@@ -130,7 +132,7 @@ class DashboardController extends Controller
         $estoqueLabels = $produtosEstoque->pluck('nome')->toArray();
         $estoqueValores = $produtosEstoque->pluck('estoque_atual')->toArray();
 
-        $ultimosPedidos = Pedido::with('itens.produto')->latest()->take(5)->get();
+        $ultimosPedidos = Pedido::with('itens.produto')->orderBy($colData, 'desc')->take(5)->get();
 
         return view('admin.dashboard', compact(
             'totalPedidos',
